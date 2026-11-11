@@ -1,0 +1,37 @@
+# Local Python environments and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Local settings and credentials
+.env
+.env.*
+!.env.example
+.idea/
+.vscode/
+Thumbs.db
+.DS_Store
+
+# Downloaded data and generated artifacts
+/data/
+/artifacts/
+/models/
+/outputs/
+*.parquet
+*.arrow
+*.feather
+*.db
+*.sqlite
+*.sqlite3
+*.csv
+*.tsv
+*.jsonl
+*.gz
+*.zip
+*.joblib
+*.log
