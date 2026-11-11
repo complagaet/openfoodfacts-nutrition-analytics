@@ -42,6 +42,12 @@
 - [Содержание проекта, границы работы и риски](docs/PROJECT_BRIEF.md)
 - [Источники и ограничения проверки](docs/SOURCES.md)
 
+## Репозиторий
+
+[complagaet/openfoodfacts-nutrition-analytics](https://github.com/complagaet/openfoodfacts-nutrition-analytics)
+создан как **приватный**. Основная ветка — `main`, remote — `origin`.
+Приватность подтверждена через GitHub API при создании 11 ноября 2026 года.
+
 ## История изменений
 
 Каждый законченный содержательный шаг оформляется отдельным коммитом.
