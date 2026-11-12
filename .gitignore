@@ -40,3 +40,4 @@ Thumbs.db
 !/tests/fixtures/*.parquet
 *.egg-info/
 !/docs/results/tables/*.csv
+build/

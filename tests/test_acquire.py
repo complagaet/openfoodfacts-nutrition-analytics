@@ -28,3 +28,13 @@ def test_default_url_is_pinned_to_the_full_run_revision() -> None:
     assert PINNED_REVISION in PARQUET_URL
     assert parquet_url("main").endswith("/resolve/main/food.parquet")
     assert len(PINNED_SHA256) == 64
+
+
+def test_installed_package_resolves_root_from_working_directory(tmp_path) -> None:
+    from offna.config import find_project_root
+
+    checkout = tmp_path / "checkout"
+    (checkout / "sql").mkdir(parents=True)
+    (checkout / "pyproject.toml").write_text("[project]\n")
+    installed = tmp_path / "venv" / "lib" / "python3.12" / "site-packages" / "offna" / "config.py"
+    assert find_project_root(installed, checkout / "docs") == checkout

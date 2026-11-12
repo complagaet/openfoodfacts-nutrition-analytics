@@ -14,7 +14,19 @@ PARQUET_URL = parquet_url(PINNED_REVISION)
 CSV_URL = "https://static.openfoodfacts.org/data/en.openfoodfacts.org.products.csv"
 
 SEED = 43
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
+
+def find_project_root(package_file: Path, working_dir: Path) -> Path:
+    source_checkout = package_file.resolve().parents[2]
+    if (source_checkout / "pyproject.toml").exists():
+        return source_checkout
+    for candidate in [working_dir, *working_dir.parents]:
+        if (candidate / "pyproject.toml").exists() and (candidate / "sql").is_dir():
+            return candidate
+    raise FileNotFoundError("run offna from the project checkout (the folder with pyproject.toml and sql/)")
+
+
+PROJECT_ROOT = find_project_root(Path(__file__), Path.cwd())
 FIXTURE_PATH = PROJECT_ROOT / "tests" / "fixtures" / "off_sample.parquet"
 
 RAW_SCALAR_COLUMNS: list[str] = [
