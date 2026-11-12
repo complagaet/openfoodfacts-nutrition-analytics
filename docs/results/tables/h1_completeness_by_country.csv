@@ -1,0 +1,12 @@
+food_group,countries,products,p_value,cramers_v,min_complete_share,max_complete_share,min_country,max_country,p_holm,supports
+alcoholic-beverages,10,31141,2.3815146565868538e-166,0.1603,0.0135,0.1889,en:italy,en:united-states,2.3815146565868538e-166,True
+baby-foods-and-milks,5,3538,3.806988970217409e-180,0.4868,0.1286,0.7526,en:italy,en:france,7.613977940434818e-180,True
+beverages,10,118020,0.0,0.1309,0.3155,0.5218,en:belgium,en:united-states,0.0,True
+cereals-and-potatoes,10,143331,0.0,0.3017,0.3942,0.8689,en:spain,en:united-states,0.0,True
+composite-foods,10,89237,0.0,0.4055,0.2996,0.909,en:spain,en:united-states,0.0,True
+fats-and-sauces,10,101778,0.0,0.3192,0.2296,0.689,en:spain,en:united-states,0.0,True
+fish-meat-eggs,10,173681,0.0,0.39,0.1494,0.7823,en:spain,en:united-states,0.0,True
+fruits-and-vegetables,10,91458,0.0,0.3333,0.2979,0.8323,en:spain,en:united-states,0.0,True
+milk-and-dairy-products,10,138319,0.0,0.4399,0.1788,0.8657,en:spain,en:united-states,0.0,True
+salty-snacks,10,55909,0.0,0.2601,0.314,0.7573,en:spain,en:united-states,0.0,True
+sugary-snacks,10,238484,0.0,0.3245,0.3017,0.7661,en:spain,en:united-states,0.0,True

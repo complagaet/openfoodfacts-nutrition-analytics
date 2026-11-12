@@ -1,0 +1,13 @@
+{
+  "url": "https://huggingface.co/datasets/openfoodfacts/product-database/resolve/11cc007d7e6709c304405410e4fb23720c4a4aa2/food.parquet",
+  "local_path": "off_sample.parquet",
+  "described_at_utc": "2026-11-12T06:50:29+00:00",
+  "size_bytes": 1437221,
+  "sha256": "3bd3c69884e0e762c26c68847c077dcb7619daa56dfde6419d60bf5b207825f9",
+  "rows": 10000,
+  "top_level_columns": 26,
+  "parquet_leaf_columns": 36,
+  "row_groups": 1,
+  "license": "Contains information from Open Food Facts (https://world.openfoodfacts.org), made available under the Open Database License (ODbL) v1.0: https://opendatacommons.org/licenses/odbl/1-0/. Individual contents: Database Contents License.",
+  "mode": "hash sample 1/490 of 4906869 rows, seed 43, 26 raw columns"
+}

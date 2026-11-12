@@ -35,3 +35,9 @@ Thumbs.db
 *.zip
 *.joblib
 *.log
+
+# Committed ODbL fixture sample for offline demo and tests
+!/tests/fixtures/*.parquet
+*.egg-info/
+!/docs/results/tables/*.csv
+build/

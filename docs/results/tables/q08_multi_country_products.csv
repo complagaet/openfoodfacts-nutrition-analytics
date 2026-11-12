@@ -1,0 +1,13 @@
+food_group,products,sold_in_3plus_countries,mean_countries,max_countries
+sugary-snacks,307934,6776,1.154,37
+cereals-and-potatoes,201218,5170,1.186,20
+unknown,3356550,4411,1.026,17
+beverages,166002,3801,1.168,49
+fats-and-sauces,131442,2496,1.148,28
+milk-and-dairy-products,184064,2344,1.109,30
+fruits-and-vegetables,111726,1693,1.124,18
+salty-snacks,74311,1413,1.142,17
+fish-meat-eggs,201074,1002,1.06,12
+composite-foods,104559,879,1.08,19
+alcoholic-beverages,39644,655,1.12,17
+baby-foods-and-milks,5162,55,1.129,8

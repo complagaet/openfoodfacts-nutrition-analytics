@@ -1,0 +1,12 @@
+food_group,products_with_salt,mean_salt_100g,above_group_mean,share_above_group_mean
+fish-meat-eggs,163537,1.951,57534,0.3518
+fats-and-sauces,105065,1.822,30002,0.2856
+salty-snacks,62220,1.623,21538,0.3462
+unknown,247109,1.558,50941,0.2061
+composite-foods,92372,1.351,23654,0.2561
+milk-and-dairy-products,154484,0.848,56719,0.3672
+cereals-and-potatoes,161020,0.828,66281,0.4116
+fruits-and-vegetables,81354,0.531,23522,0.2891
+alcoholic-beverages,139,0.475,19,0.1367
+sugary-snacks,240010,0.447,80159,0.334
+beverages,116043,0.214,7778,0.067

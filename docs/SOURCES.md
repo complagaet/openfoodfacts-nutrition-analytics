@@ -75,3 +75,17 @@ DOCX. Внешние сведения выше относятся к докум�
 Выбор SQLite, Streamlit, двух конкретных моделей, протокола сравнения
 и формулировки гипотез в [описании проекта](PROJECT_BRIEF.md) — предложения
 для будущей реализации, а не дополнительные требования преподавателя.
+
+## Проверено при реализации, 12 ноября 2026 года
+
+| Что | Результат | Где в проекте |
+| --- | --- | --- |
+| Снимок Parquet | `food.parquet`, 8 045 833 255 байт, sha256 `be58c2f3…6707c`, 4 906 869 строк, 111 столбцов | `docs/results/full_snapshot.json` |
+| Поле версии Nutri-Score | отсутствует; версия 2023 установлена по коду OFF и тегам `en:nutriscore-2021-<x>-2023-<y>` в `misc_tags` | REPORT §7.1 |
+| Правило Nutri-Score | пороги и категории перенесены из `lib/ProductOpener/Nutriscore.pm`, `Food.pm`, `Config_off.pm` (openfoodfacts-server, ветка `main`) | `src/offna/nutriscore.py`, `categories.py` |
+| CSV-выгрузка | первые 20 МБ: 9 938 пустых строк и 2 156 отсортированных обрывков; наивное чтение сдвигает столбцы | `docs/results/csv_audit.json` |
+| Подсластители | `with_non_nutritive_sweeteners` — только 1 или NULL; «нет» отличимо от «неизвестно» только при `ingredients_n > 0` | REPORT §6 |
+
+Фикстура `tests/fixtures/off_sample.parquet` (10 000 строк, 26 столбцов) — производная база
+Open Food Facts. ODbL разрешает распространять извлечения при указании источника и сохранении
+лицензии ODbL для производной базы; атрибуция записана в `tests/fixtures/off_sample.snapshot.json` и README.

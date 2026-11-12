@@ -1,0 +1,17 @@
+{
+  "profile": "full",
+  "unit": "product-country pairs (a product sold in k countries counts k times)",
+  "min_products_per_country": 500,
+  "tables": {
+    "country_food_group": {
+      "rows": 1439,
+      "columns": 24
+    },
+    "grade_counts": {
+      "rows": 5361,
+      "columns": 4
+    }
+  },
+  "seconds": 0.31,
+  "peak_rss_mib": 871.7
+}
