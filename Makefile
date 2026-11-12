@@ -11,7 +11,7 @@ SUBSET_ROWS_full = 1000000
 setup:
 	uv venv --python 3.12 .venv
 	uv pip install --python $(PYTHON) -r requirements-dev.txt
-	uv pip install --python $(PYTHON) --no-deps -e .
+	uv pip install --python $(PYTHON) --no-deps --reinstall-package offna .
 
 acquire:
 	$(RUN) acquire --source parquet

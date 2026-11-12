@@ -34,9 +34,13 @@ make app                   # Streamlit: http://localhost:8501
 ```bash
 python3.12 -m venv .venv
 .venv/bin/pip install -r requirements.txt
-.venv/bin/pip install --no-deps -e .
+.venv/bin/pip install --no-deps .
 make pipeline
 ```
+
+Пакет ставится обычной (не editable) установкой: на macOS в синхронизируемой папке `~/Documents`
+система помечает `.pth`-файлы editable-установки скрытыми, и Python 3.12 их пропускает
+(`No module named offna`). После правок кода в `src/` повторите `make setup`.
 
 Консольное меню вместо дашборда: `make menu`. Презентация `docs/slides.pptx` пересобирается
 из `docs/SLIDES.md` и `docs/results` командой `make slides` (python-pptx из `requirements-dev.txt`).
