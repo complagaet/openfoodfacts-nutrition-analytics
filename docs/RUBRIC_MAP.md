@@ -37,7 +37,7 @@
 
 | Критерий | Баллы | Основные артефакты |
 | --- | ---: | --- |
-| Программная реализация | 20 | пакет `offna`, `app.py`, `menu.py`, обработка ошибок, 44 теста |
+| Программная реализация | 20 | пакет `offna`, `app.py`, `menu.py`, обработка ошибок, тесты pytest (`tests/`) |
 | Данные и предобработка | 15 | `acquire.py`, `etl.py`, `audit.py`, `csv_audit.py`; REPORT §1–3 |
 | Базы данных и SQL | 10 | `sql/`, `database.py`, DATABASE.md; REPORT §5 |
 | Анализ и визуализация | 15 | `eda.py`, `hypotheses.py`, `docs/figures`; REPORT §6 |

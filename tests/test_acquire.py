@@ -38,3 +38,42 @@ def test_installed_package_resolves_root_from_working_directory(tmp_path) -> Non
     (checkout / "pyproject.toml").write_text("[project]\n")
     installed = tmp_path / "venv" / "lib" / "python3.12" / "site-packages" / "offna" / "config.py"
     assert find_project_root(installed, checkout / "docs") == checkout
+
+
+def test_missing_hub_etag_falls_back_to_pinned_sha_for_default_revision() -> None:
+    import pytest
+
+    from offna.acquire import verify_sha256
+
+    verify_sha256({"sha256": PINNED_SHA256, "url": PARQUET_URL, "hub_sha256": None})
+    with pytest.raises(ValueError, match="does not match"):
+        verify_sha256({"sha256": "0" * 64, "url": PARQUET_URL, "hub_sha256": None})
+
+
+def test_unverifiable_custom_url_raises_unless_skipped() -> None:
+    import pytest
+
+    from offna.acquire import verify_sha256
+
+    snapshot = {"sha256": "1" * 64, "url": "https://mirror.example/food.parquet", "hub_sha256": None}
+    with pytest.raises(ValueError, match="cannot verify"):
+        verify_sha256(snapshot)
+    verify_sha256(snapshot, skip=True)
+
+
+def test_root_falls_back_to_working_directory_outside_a_checkout(tmp_path) -> None:
+    from offna.config import resolve_project_root
+
+    installed = tmp_path / "venv" / "lib" / "python3.12" / "site-packages" / "offna" / "config.py"
+    assert resolve_project_root(installed, tmp_path) == tmp_path
+
+
+def test_benchmark_worker_runs_the_same_source_tree_as_the_parent() -> None:
+    from pathlib import Path
+
+    import offna
+    from offna.benchmark import worker_command
+
+    command = worker_command("polars_lazy", Path("a"), Path("b"))
+    assert str(Path(offna.__file__).resolve().parents[1]) in command[3]
+    assert "-m" not in command

@@ -18,7 +18,7 @@ def stage_acquire(args: argparse.Namespace) -> dict:
 
     profile = get_profile("full")
     if args.source == "parquet":
-        return acquire.acquire_parquet(profile.raw_path, args.url or parquet_url(args.revision))
+        return acquire.acquire_parquet(profile.raw_path, args.url or parquet_url(args.revision), args.skip_verify)
     if args.source == "sample":
         return acquire.acquire_sample(
             profile.raw_path.with_name(f"sample_{args.rows}.parquet"), args.rows, parquet_url(args.revision)
@@ -28,7 +28,7 @@ def stage_acquire(args: argparse.Namespace) -> dict:
     if args.source == "snapshot":
         url = args.url or parquet_url(args.revision)
         snapshot = acquire.describe_snapshot(profile.raw_path, url, acquire.remote_headers(url))
-        acquire.verify_sha256(snapshot)
+        acquire.verify_sha256(snapshot, args.skip_verify)
         acquire.write_json(profile.raw_path.parent.parent / "SNAPSHOT.json", snapshot)
         return snapshot
     return acquire.build_fixture(profile.raw_path, FIXTURE_PATH, args.rows)
@@ -130,6 +130,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--source", choices=["parquet", "sample", "csv-head", "snapshot", "fixture"], default="parquet")
     parser.add_argument("--url")
     parser.add_argument("--revision", default=PINNED_REVISION)
+    parser.add_argument("--skip-verify", action="store_true")
     parser.add_argument("--rows", type=int, default=5000)
     parser.add_argument("--bytes", type=int, default=20_000_000)
     parser.add_argument("--input", default="data/raw/csv_head.tsv")
@@ -145,7 +146,7 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
         result = STAGES[args.stage](args)
-    except FileNotFoundError as error:
+    except (FileNotFoundError, ValueError) as error:
         print(f"error: {error}", file=sys.stderr)
         return 2
     _print(result)

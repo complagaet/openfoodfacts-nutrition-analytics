@@ -26,7 +26,14 @@ def find_project_root(package_file: Path, working_dir: Path) -> Path:
     raise FileNotFoundError("run offna from the project checkout (the folder with pyproject.toml and sql/)")
 
 
-PROJECT_ROOT = find_project_root(Path(__file__), Path.cwd())
+def resolve_project_root(package_file: Path, working_dir: Path) -> Path:
+    try:
+        return find_project_root(package_file, working_dir)
+    except FileNotFoundError:
+        return working_dir
+
+
+PROJECT_ROOT = resolve_project_root(Path(__file__), Path.cwd())
 FIXTURE_PATH = PROJECT_ROOT / "tests" / "fixtures" / "off_sample.parquet"
 
 RAW_SCALAR_COLUMNS: list[str] = [

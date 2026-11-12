@@ -23,9 +23,9 @@
 ```bash
 git clone git@github.com:complagaet/openfoodfacts-nutrition-analytics.git
 cd openfoodfacts-nutrition-analytics
-make setup                 # .venv на Python 3.12 + зависимости из requirements.txt
+make setup                 # .venv на Python 3.12 + зависимости из requirements-dev.txt
 make pipeline              # ETL → аудит → агрегаты → бенчмарк → SQLite → модели → EDA (PROFILE=demo)
-make test                  # pytest, 44 теста
+make test                  # pytest
 make app                   # Streamlit: http://localhost:8501
 ```
 
@@ -33,14 +33,14 @@ make app                   # Streamlit: http://localhost:8501
 
 ```bash
 python3.12 -m venv .venv
-.venv/bin/pip install -r requirements.txt
-.venv/bin/pip install --no-deps .
+.venv/bin/pip install -r requirements-dev.txt
 make pipeline
 ```
 
-Пакет ставится обычной (не editable) установкой: на macOS в синхронизируемой папке `~/Documents`
-система помечает `.pth`-файлы editable-установки скрытыми, и Python 3.12 их пропускает
-(`No module named offna`). После правок кода в `src/` повторите `make setup`.
+Пакет `offna` не устанавливается в `.venv`: `make` запускает его прямо из `src/`, pytest берёт `src/`
+через `pythonpath`, поэтому правки кода видны сразу и устаревшая копия в site-packages
+не может подменить исходники. (Editable-установка не годится: на macOS в `~/Documents`
+система помечает её `.pth` скрытым, и Python 3.12 его пропускает.)
 
 Консольное меню вместо дашборда: `make menu`. Презентация `docs/slides.pptx` пересобирается
 из `docs/SLIDES.md` и `docs/results` командой `make slides` (python-pptx из `requirements-dev.txt`).

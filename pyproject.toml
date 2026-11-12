@@ -24,4 +24,5 @@ ignore = ["PLR2004", "PLR0913", "PLC0415", "RUF001"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["src"]
 addopts = "-q"

@@ -10,6 +10,7 @@ import polars as pl
 import psutil
 import pyarrow as pa
 
+import offna
 from offna.config import CORE_NUTRIENTS, SEED, Profile
 from offna.engines import BENCH_COLUMNS, ENGINES, frames_match
 from offna.etl import scan_processed
@@ -38,8 +39,17 @@ def write_subset(profile: Profile, rows: int) -> dict:
     }
 
 
+def worker_command(engine: str, source: Path, output_dir: Path) -> list[str]:
+    source_root = str(Path(offna.__file__).resolve().parents[1])
+    bootstrap = (
+        f"import sys; sys.path.insert(0, {source_root!r}); "
+        "from offna.bench_worker import main; raise SystemExit(main(sys.argv[1:]))"
+    )
+    return [sys.executable, "-I", "-c", bootstrap, engine, str(source), str(output_dir)]
+
+
 def run_worker(engine: str, source: Path, output_dir: Path) -> dict:
-    command = [sys.executable, "-I", "-m", "offna.bench_worker", engine, str(source), str(output_dir)]
+    command = worker_command(engine, source, output_dir)
     completed = subprocess.run(command, capture_output=True, text=True, timeout=WORKER_TIMEOUT_SECONDS, check=False)
     if completed.returncode != 0:
         raise RuntimeError(f"{engine} failed: {completed.stderr.strip()[-2000:]}")

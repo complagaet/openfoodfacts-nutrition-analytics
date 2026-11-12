@@ -1,6 +1,7 @@
 PROFILE ?= demo
 PYTHON ?= .venv/bin/python
-RUN = $(PYTHON) -I -m offna
+SRC = $(CURDIR)/src
+RUN = $(PYTHON) -I -c 'import sys; sys.path.insert(0, "$(SRC)"); from offna.cli import main; sys.exit(main())'
 BATCH_ROWS_demo = 2500
 BATCH_ROWS_full = 250000
 SUBSET_ROWS_demo = 10000
@@ -11,7 +12,7 @@ SUBSET_ROWS_full = 1000000
 setup:
 	uv venv --python 3.12 .venv
 	uv pip install --python $(PYTHON) -r requirements-dev.txt
-	uv pip install --python $(PYTHON) --no-deps --reinstall-package offna .
+	-uv pip uninstall --python $(PYTHON) offna
 
 acquire:
 	$(RUN) acquire --source parquet
@@ -49,7 +50,7 @@ eda:
 pipeline: etl audit aggregates benchmark sql model eda
 
 app:
-	$(PYTHON) -m streamlit run app.py
+	PYTHONPATH=$(SRC) $(PYTHON) -m streamlit run app.py
 
 slides:
 	$(RUN) slides

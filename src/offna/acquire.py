@@ -5,7 +5,7 @@ import polars as pl
 import pyarrow.parquet as pq
 import requests
 
-from offna.config import CSV_URL, PARQUET_URL, RAW_COLUMNS, SEED
+from offna.config import CSV_URL, PARQUET_URL, PINNED_SHA256, RAW_COLUMNS, SEED
 from offna.measure import utc_now_iso, write_json
 
 DOWNLOAD_CHUNK_BYTES = 8 * 2**20
@@ -56,10 +56,24 @@ def remote_headers(url: str) -> dict:
     return hub_metadata(response)
 
 
-def verify_sha256(snapshot: dict) -> None:
-    expected = snapshot.get("hub_sha256")
-    if expected and expected != snapshot["sha256"]:
-        raise ValueError(f"sha256 {snapshot['sha256']} does not match the hub ETag {expected}")
+def expected_sha256(snapshot: dict) -> str | None:
+    if snapshot.get("hub_sha256"):
+        return snapshot["hub_sha256"]
+    if snapshot.get("url") == PARQUET_URL:
+        return PINNED_SHA256
+    return None
+
+
+def verify_sha256(snapshot: dict, skip: bool = False) -> None:
+    if skip:
+        return
+    expected = expected_sha256(snapshot)
+    if expected is None:
+        raise ValueError(
+            f"cannot verify {snapshot.get('url')}: no hub ETag and not the pinned revision; use --skip-verify"
+        )
+    if expected != snapshot["sha256"]:
+        raise ValueError(f"sha256 {snapshot['sha256']} does not match the expected {expected}")
 
 
 def describe_snapshot(path: Path, url: str, extra: dict | None = None) -> dict:
@@ -90,10 +104,10 @@ def download(url: str, destination: Path) -> dict:
     return headers
 
 
-def acquire_parquet(destination: Path, url: str = PARQUET_URL) -> dict:
+def acquire_parquet(destination: Path, url: str = PARQUET_URL, skip_verify: bool = False) -> dict:
     headers = download(url, destination)
     snapshot = describe_snapshot(destination, url, headers)
-    verify_sha256(snapshot)
+    verify_sha256(snapshot, skip_verify)
     write_json(destination.parent.parent / "SNAPSHOT.json", snapshot)
     return snapshot
 
