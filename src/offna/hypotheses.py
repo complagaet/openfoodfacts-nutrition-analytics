@@ -155,6 +155,8 @@ def _min_expected(table: pd.DataFrame) -> float:
 
 def chi2_ready_table(table: pd.DataFrame) -> tuple[str, pd.DataFrame | None]:
     table = table.loc[:, table.sum(axis=0) > 0]
+    if table.shape[1] < 2:
+        return "skipped_single_grade", None
     if _min_expected(table) >= MIN_EXPECTED_COUNT:
         return "chi2_5_grades", table
     merged = pd.DataFrame(

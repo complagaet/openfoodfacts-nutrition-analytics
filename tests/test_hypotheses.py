@@ -31,3 +31,9 @@ def test_bootstrap_uses_every_observation() -> None:
     treated = np.concatenate([np.zeros(6000), np.full(6000, 10.0)])
     low, high = bootstrap_median_difference(treated, np.zeros(7000), rng)
     assert low <= 5.0 <= high
+
+
+def test_single_grade_stratum_is_skipped() -> None:
+    method, table = chi2_ready_table(grade_table({0: [0, 0, 50, 0, 0], 1: [0, 0, 40, 0, 0]}))
+    assert method == "skipped_single_grade"
+    assert table is None
