@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lint-test:
+    name: Lint and tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: requirements*.txt
+      - name: Set up environment
+        run: make setup
+      - name: Lint
+        run: make lint
+      - name: Tests
+        run: make test
+
+  pipeline:
+    name: Demo pipeline on fixture
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: requirements*.txt
+      - name: Set up environment
+        run: make setup
+      - name: Run pipeline
+        run: make pipeline PROFILE=demo
+      - name: Build slides
+        run: make slides
+      - name: Pipeline leaves tracked files unchanged
+        run: git diff --exit-code -- . ':!docs/slides.pptx'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: demo-outputs
+          path: |
+            outputs/demo/
+            docs/slides.pptx
+          retention-days: 14
