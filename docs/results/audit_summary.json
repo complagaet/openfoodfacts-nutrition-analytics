@@ -1,0 +1,62 @@
+{
+  "profile": "full",
+  "schema_width": {
+    "raw_top_level_columns": 111,
+    "distinct_nutrient_names": 894,
+    "nutriment_value_fields": 8,
+    "fully_flattened_columns": 7262
+  },
+  "overview": {
+    "rows": 4906867,
+    "unique_codes": 4906806,
+    "graded_rows": 1437062,
+    "multi_country_rows": 235948,
+    "created_min": "2012-01-31 14:43:58+00:00",
+    "created_max": "2026-11-11 05:26:47+00:00"
+  },
+  "duplicates": {
+    "duplicate_codes": 61,
+    "rows_with_duplicate_code": 122,
+    "brand_name_keys_repeated": 238746,
+    "rows_with_repeated_brand_name": 701181
+  },
+  "invalid_values_before_cleaning": {
+    "carbohydrates_100g_negative": 1,
+    "carbohydrates_100g_over_100g": 14760,
+    "created_after_snapshot": 0,
+    "created_before_off_launch": 0,
+    "energy_kcal_over_max": 17513,
+    "energy_kj_100g_negative": 18,
+    "energy_kj_over_max": 16298,
+    "fat_100g_negative": 2,
+    "fat_100g_over_100g": 6481,
+    "fiber_100g_negative": 108,
+    "fiber_100g_over_100g": 557,
+    "macros_sum_over_105g": 76828,
+    "missing_code": 2,
+    "modified_before_created": 0,
+    "proteins_100g_negative": 4,
+    "proteins_100g_over_100g": 2085,
+    "salt_100g_negative": 3,
+    "salt_100g_over_100g": 2389,
+    "saturated_fat_100g_negative": 4,
+    "saturated_fat_100g_over_100g": 1181,
+    "saturated_fat_above_fat": 2533,
+    "sodium_100g_negative": 3,
+    "sodium_100g_over_100g": 1499,
+    "sugars_100g_negative": 0,
+    "sugars_100g_over_100g": 6673,
+    "sugars_above_carbohydrates": 4033
+  },
+  "tables": {
+    "missing_overall": "missing_overall.csv",
+    "missing_by_country": "missing_by_country.csv",
+    "missing_by_food_group": "missing_by_food_group.csv",
+    "outliers_iqr": "outliers_iqr.csv",
+    "created_by_year": "created_by_year.csv",
+    "grade_distribution": "grade_distribution.csv",
+    "nutrient_inventory": "nutrient_inventory.csv"
+  },
+  "seconds": 2.89,
+  "peak_rss_mib": 1207.5
+}

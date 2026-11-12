@@ -1,0 +1,32 @@
+{
+  "input": "csv_head.tsv",
+  "input_mib": 19.1,
+  "naive_pandas_skip_bad_lines": {
+    "rows": 11146,
+    "columns": 201,
+    "rows_with_invalid_grade": 1920,
+    "rows_with_implausible_code": 4215
+  },
+  "field_count_validated": {
+    "columns": 201,
+    "physical_lines": 22858,
+    "empty_lines": 9938,
+    "records": 6932,
+    "stitched_records": 3,
+    "rejected_fragments": 2156,
+    "implausible_records": 3
+  },
+  "wide_table_memory": {
+    "rows": 6929,
+    "columns": 201,
+    "default_mib": 20.99,
+    "optimised_mib": 8.81,
+    "category_columns": 58
+  },
+  "timings": {
+    "naive": 0.119,
+    "validated": 0.227,
+    "memory": 0.103
+  },
+  "peak_rss_mib": 290.6
+}

@@ -1,0 +1,17 @@
+field,missing_share
+ingredients_text,0.7244
+nutriscore_grade,0.7071
+food_group,0.6877
+fiber_100g,0.6158
+salt_100g,0.3759
+saturated_fat_100g,0.3468
+brand,0.3349
+sugars_100g,0.3323
+carbohydrates_100g,0.2911
+fat_100g,0.2897
+proteins_100g,0.2877
+energy_kcal_100g,0.2854
+categories_tags,0.0772
+product_name,0.061
+countries_tags,0.0028
+created_at,0.0

@@ -1,0 +1,61 @@
+{
+  "profile": "full",
+  "database": "off.sqlite",
+  "database_mib": 1646.2,
+  "table_rows": {
+    "food_group": 12,
+    "country": 501,
+    "category": 124648,
+    "nutrient": 9,
+    "product": 4906806,
+    "product_country": 5172813,
+    "product_category": 10806905,
+    "product_nutrient": 28909738
+  },
+  "queries": {
+    "q01_products_by_country": {
+      "rows": 25,
+      "seconds": 1.826
+    },
+    "q02_grade_share_by_country": {
+      "rows": 50,
+      "seconds": 3.554
+    },
+    "q03_sugar_rank_categories": {
+      "rows": 34,
+      "seconds": 6.085
+    },
+    "q04_completeness_country_food_group": {
+      "rows": 461,
+      "seconds": 5.69
+    },
+    "q05_sweeteners_sugar": {
+      "rows": 23,
+      "seconds": 1.211
+    },
+    "q06_products_per_year_running": {
+      "rows": 15,
+      "seconds": 0.7
+    },
+    "q07_salt_above_group_average": {
+      "rows": 11,
+      "seconds": 2.373
+    },
+    "q08_multi_country_products": {
+      "rows": 12,
+      "seconds": 1.259
+    },
+    "q09_salt_quartile_grades": {
+      "rows": 20,
+      "seconds": 1.951
+    },
+    "q10_nova_vs_grade": {
+      "rows": 20,
+      "seconds": 0.39
+    }
+  },
+  "timings": {
+    "load_sqlite": 87.353
+  },
+  "peak_rss_mib": 1315.3
+}

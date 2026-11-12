@@ -1,0 +1,113 @@
+{
+  "profile": "full",
+  "tasks": [
+    "T1: product-country pairs and missing share of 8 core nutrients per sales country",
+    "T2: products and mean of 8 core nutrients per food group (nulls ignored)"
+  ],
+  "subset_file": {
+    "rows": 1000000,
+    "file_mib": 18.97
+  },
+  "dataframe_size": {
+    "rows": 1000000,
+    "default_mib": 218.2,
+    "optimised_mib": 165.8
+  },
+  "environment": {
+    "python": "3.12.13",
+    "platform": "macOS-27.2.1-arm64-arm-64bit",
+    "machine": "arm64",
+    "cpu_count": 10,
+    "ram_gib": 24.0,
+    "pandas": "3.1.1",
+    "polars": "2.1.0",
+    "pyarrow": "26.0.1",
+    "file_cache": "warm after first run; first_run_s reported separately"
+  },
+  "results": {
+    "subset": {
+      "rows": 1000000,
+      "engines": [
+        {
+          "engine": "pandas_default",
+          "runs": 3,
+          "first_run_s": 0.7,
+          "median_s": 0.647,
+          "min_s": 0.577,
+          "peak_rss_mib_max": 889.3,
+          "polars_threads": 10
+        },
+        {
+          "engine": "pandas_chunked_optimised",
+          "runs": 3,
+          "first_run_s": 0.674,
+          "median_s": 0.674,
+          "min_s": 0.658,
+          "peak_rss_mib_max": 446.0,
+          "polars_threads": 10
+        },
+        {
+          "engine": "polars_lazy",
+          "runs": 3,
+          "first_run_s": 0.061,
+          "median_s": 0.044,
+          "min_s": 0.043,
+          "peak_rss_mib_max": 389.2,
+          "polars_threads": 10
+        }
+      ],
+      "equality": {
+        "pandas_default_vs_polars_lazy_country": {
+          "equal": true,
+          "max_abs_diff": 0.0
+        },
+        "pandas_chunked_optimised_vs_polars_lazy_country": {
+          "equal": true,
+          "max_abs_diff": 0.0
+        },
+        "pandas_default_vs_polars_lazy_food_group": {
+          "equal": true,
+          "max_abs_diff": 1.4210854715202004e-14
+        },
+        "pandas_chunked_optimised_vs_polars_lazy_food_group": {
+          "equal": true,
+          "max_abs_diff": 1.4210854715202004e-14
+        }
+      }
+    },
+    "full": {
+      "rows": 4906867,
+      "engines": [
+        {
+          "engine": "pandas_chunked_optimised",
+          "runs": 3,
+          "first_run_s": 4.147,
+          "median_s": 4.053,
+          "min_s": 4.047,
+          "peak_rss_mib_max": 401.6,
+          "polars_threads": 10
+        },
+        {
+          "engine": "polars_lazy",
+          "runs": 3,
+          "first_run_s": 0.145,
+          "median_s": 0.145,
+          "min_s": 0.144,
+          "peak_rss_mib_max": 639.6,
+          "polars_threads": 10
+        }
+      ],
+      "equality": {
+        "pandas_chunked_optimised_vs_polars_lazy_country": {
+          "equal": true,
+          "max_abs_diff": 0.0
+        },
+        "pandas_chunked_optimised_vs_polars_lazy_food_group": {
+          "equal": true,
+          "max_abs_diff": 1.1368683772161603e-13
+        }
+      }
+    }
+  },
+  "orchestrator_peak_rss_mib": 765.7
+}
