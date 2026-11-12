@@ -6,12 +6,13 @@
   ],
   "subset_file": {
     "rows": 1000000,
-    "file_mib": 18.97
+    "sampling": "uniform random sample without replacement, seed 43",
+    "file_mib": 21.37
   },
   "dataframe_size": {
     "rows": 1000000,
-    "default_mib": 218.2,
-    "optimised_mib": 165.8
+    "default_mib": 212.1,
+    "optimised_mib": 165.6
   },
   "environment": {
     "python": "3.12.13",
@@ -31,28 +32,28 @@
         {
           "engine": "pandas_default",
           "runs": 3,
-          "first_run_s": 0.7,
-          "median_s": 0.647,
-          "min_s": 0.577,
-          "peak_rss_mib_max": 889.3,
+          "first_run_s": 0.61,
+          "median_s": 0.6,
+          "min_s": 0.597,
+          "peak_rss_mib_max": 869.4,
           "polars_threads": 10
         },
         {
           "engine": "pandas_chunked_optimised",
           "runs": 3,
-          "first_run_s": 0.674,
-          "median_s": 0.674,
-          "min_s": 0.658,
-          "peak_rss_mib_max": 446.0,
+          "first_run_s": 0.682,
+          "median_s": 0.684,
+          "min_s": 0.682,
+          "peak_rss_mib_max": 424.7,
           "polars_threads": 10
         },
         {
           "engine": "polars_lazy",
           "runs": 3,
-          "first_run_s": 0.061,
-          "median_s": 0.044,
-          "min_s": 0.043,
-          "peak_rss_mib_max": 389.2,
+          "first_run_s": 0.049,
+          "median_s": 0.049,
+          "min_s": 0.046,
+          "peak_rss_mib_max": 385.7,
           "polars_threads": 10
         }
       ],
@@ -67,11 +68,11 @@
         },
         "pandas_default_vs_polars_lazy_food_group": {
           "equal": true,
-          "max_abs_diff": 1.4210854715202004e-14
+          "max_abs_diff": 5.329070518200751e-15
         },
         "pandas_chunked_optimised_vs_polars_lazy_food_group": {
           "equal": true,
-          "max_abs_diff": 1.4210854715202004e-14
+          "max_abs_diff": 5.329070518200751e-15
         }
       }
     },
@@ -81,19 +82,19 @@
         {
           "engine": "pandas_chunked_optimised",
           "runs": 3,
-          "first_run_s": 4.147,
-          "median_s": 4.053,
-          "min_s": 4.047,
-          "peak_rss_mib_max": 401.6,
+          "first_run_s": 4.141,
+          "median_s": 4.314,
+          "min_s": 4.141,
+          "peak_rss_mib_max": 409.5,
           "polars_threads": 10
         },
         {
           "engine": "polars_lazy",
           "runs": 3,
-          "first_run_s": 0.145,
-          "median_s": 0.145,
-          "min_s": 0.144,
-          "peak_rss_mib_max": 639.6,
+          "first_run_s": 0.14,
+          "median_s": 0.187,
+          "min_s": 0.14,
+          "peak_rss_mib_max": 624.5,
           "polars_threads": 10
         }
       ],
@@ -109,5 +110,5 @@
       }
     }
   },
-  "orchestrator_peak_rss_mib": 765.7
+  "orchestrator_peak_rss_mib": 1290.6
 }

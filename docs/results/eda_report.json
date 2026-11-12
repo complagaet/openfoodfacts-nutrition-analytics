@@ -15,14 +15,19 @@
     "verdict": "supported"
   },
   "h2": {
-    "protocol": "Unit: products with parsed ingredients (ingredients_n > 0), so a missing sweetener flag means 'none detected', not 'unknown'. Strata: level-2 food groups (comparable categories) with >= 30 products in each arm. Sugars: two-sided Mann-Whitney U, effect = median difference (sweetener - none) with bootstrap 95% CI (1000 resamples, seed 43) and rank-biserial r. Nutri-Score: chi-square sweetener x grade on graded products, Cramer's V. Holm correction within each family.",
+    "protocol": "Unit: products with parsed ingredients (ingredients_n > 0), so a missing sweetener flag means 'none detected', not 'unknown'. Strata: level-2 food groups (comparable categories) with >= 30 products in each arm. Sugars: two-sided Mann-Whitney U, effect = median difference (sweetener - none) with bootstrap 95% CI (1000 resamples, seed 43) and rank-biserial r. Bootstrap uses every observation of both arms. Nutri-Score: chi-square sweetener x grade on graded products when all expected counts are >= 5; otherwise grades are merged into AB/C/DE, and the stratum is skipped if that is still too sparse. Cramer's V, Holm correction within each family.",
     "population_products": 873065,
     "share_with_sweetener": 0.0245,
     "tested_groups": 21,
     "sugar_significant_groups": 18,
     "sugar_lower_with_sweetener_groups": 12,
-    "grade_significant_groups": 20,
+    "grade_significant_groups": 16,
+    "grade_test_methods": {
+      "chi2_5_grades": 12,
+      "chi2_merged_ab_c_de": 5,
+      "skipped_expected_below_5": 4
+    },
     "verdict": "supported"
   },
-  "peak_rss_mib": 786.5
+  "peak_rss_mib": 777.4
 }

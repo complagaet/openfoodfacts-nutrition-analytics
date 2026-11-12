@@ -25,7 +25,7 @@ git clone git@github.com:complagaet/openfoodfacts-nutrition-analytics.git
 cd openfoodfacts-nutrition-analytics
 make setup                 # .venv на Python 3.12 + зависимости из requirements.txt
 make pipeline              # ETL → аудит → агрегаты → бенчмарк → SQLite → модели → EDA (PROFILE=demo)
-make test                  # pytest, 23 теста
+make test                  # pytest, 44 теста
 make app                   # Streamlit: http://localhost:8501
 ```
 
@@ -38,7 +38,8 @@ python3.12 -m venv .venv
 make pipeline
 ```
 
-Консольное меню вместо дашборда: `make menu`.
+Консольное меню вместо дашборда: `make menu`. Презентация `docs/slides.pptx` пересобирается
+из `docs/SLIDES.md` и `docs/results` командой `make slides` (python-pptx из `requirements-dev.txt`).
 Отдельные этапы: `make etl`, `make audit`, `make sql` и т. д. (см. `Makefile`).
 Полный набор транзитивных версий, проверенный в чистом окружении, — `requirements-lock.txt`
 (`pip install -r requirements-lock.txt` вместо `requirements.txt`).
