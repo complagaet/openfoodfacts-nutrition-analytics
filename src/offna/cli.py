@@ -4,7 +4,7 @@ import sys
 from collections.abc import Callable
 from pathlib import Path
 
-from offna.config import CSV_URL, FIXTURE_PATH, PARQUET_URL, PROFILES, Profile, get_profile
+from offna.config import CSV_URL, FIXTURE_PATH, PINNED_REVISION, PROFILES, Profile, get_profile, parquet_url
 
 PIPELINE_STAGES: list[str] = ["etl", "audit", "aggregates", "sql", "model", "eda"]
 
@@ -18,14 +18,17 @@ def stage_acquire(args: argparse.Namespace) -> dict:
 
     profile = get_profile("full")
     if args.source == "parquet":
-        return acquire.acquire_parquet(profile.raw_path, args.url or PARQUET_URL)
+        return acquire.acquire_parquet(profile.raw_path, args.url or parquet_url(args.revision))
     if args.source == "sample":
-        return acquire.acquire_sample(profile.raw_path.with_name(f"sample_{args.rows}.parquet"), args.rows)
+        return acquire.acquire_sample(
+            profile.raw_path.with_name(f"sample_{args.rows}.parquet"), args.rows, parquet_url(args.revision)
+        )
     if args.source == "csv-head":
         return acquire.acquire_csv_head(profile.raw_path.with_name("csv_head.tsv"), args.bytes, args.url or CSV_URL)
     if args.source == "snapshot":
-        url = args.url or PARQUET_URL
+        url = args.url or parquet_url(args.revision)
         snapshot = acquire.describe_snapshot(profile.raw_path, url, acquire.remote_headers(url))
+        acquire.verify_sha256(snapshot)
         acquire.write_json(profile.raw_path.parent.parent / "SNAPSHOT.json", snapshot)
         return snapshot
     return acquire.build_fixture(profile.raw_path, FIXTURE_PATH, args.rows)
@@ -119,6 +122,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--profile", choices=sorted(PROFILES), default="demo")
     parser.add_argument("--source", choices=["parquet", "sample", "csv-head", "snapshot", "fixture"], default="parquet")
     parser.add_argument("--url")
+    parser.add_argument("--revision", default=PINNED_REVISION)
     parser.add_argument("--rows", type=int, default=5000)
     parser.add_argument("--bytes", type=int, default=20_000_000)
     parser.add_argument("--input", default="data/raw/csv_head.tsv")

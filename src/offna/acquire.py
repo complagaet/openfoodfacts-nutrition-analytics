@@ -35,15 +35,31 @@ def parquet_shape(path: Path) -> dict[str, int]:
     }
 
 
-def remote_headers(url: str) -> dict:
-    response = requests.head(url, allow_redirects=True, timeout=REQUEST_TIMEOUT_SECONDS)
-    response.raise_for_status()
+def _quoted(value: str | None) -> str | None:
+    return value.strip('"') if value else None
+
+
+def hub_metadata(response: requests.Response) -> dict:
+    hub = response.history[0] if response.history else response
+    size = hub.headers.get("X-Linked-Size")
     return {
         "final_url": response.url.split("?")[0],
-        "etag": response.headers.get("ETag"),
-        "last_modified": response.headers.get("Last-Modified"),
-        "hf_revision": response.headers.get("X-Repo-Commit"),
+        "hf_revision": hub.headers.get("X-Repo-Commit"),
+        "hub_sha256": _quoted(hub.headers.get("X-Linked-ETag")),
+        "hub_size_bytes": int(size) if size else None,
     }
+
+
+def remote_headers(url: str) -> dict:
+    response = requests.head(url, allow_redirects=False, timeout=REQUEST_TIMEOUT_SECONDS)
+    response.raise_for_status()
+    return hub_metadata(response)
+
+
+def verify_sha256(snapshot: dict) -> None:
+    expected = snapshot.get("hub_sha256")
+    if expected and expected != snapshot["sha256"]:
+        raise ValueError(f"sha256 {snapshot['sha256']} does not match the hub ETag {expected}")
 
 
 def describe_snapshot(path: Path, url: str, extra: dict | None = None) -> dict:
@@ -66,12 +82,7 @@ def download(url: str, destination: Path) -> dict:
     partial = destination.with_suffix(destination.suffix + ".part")
     with requests.get(url, stream=True, timeout=REQUEST_TIMEOUT_SECONDS) as response:
         response.raise_for_status()
-        headers = {
-            "final_url": response.url.split("?")[0],
-            "etag": response.headers.get("ETag"),
-            "last_modified": response.headers.get("Last-Modified"),
-            "hf_revision": response.headers.get("X-Repo-Commit"),
-        }
+        headers = hub_metadata(response)
         with partial.open("wb") as handle:
             for block in response.iter_content(DOWNLOAD_CHUNK_BYTES):
                 handle.write(block)
@@ -82,6 +93,7 @@ def download(url: str, destination: Path) -> dict:
 def acquire_parquet(destination: Path, url: str = PARQUET_URL) -> dict:
     headers = download(url, destination)
     snapshot = describe_snapshot(destination, url, headers)
+    verify_sha256(snapshot)
     write_json(destination.parent.parent / "SNAPSHOT.json", snapshot)
     return snapshot
 

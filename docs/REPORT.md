@@ -9,7 +9,7 @@ macOS 27.2, Python 3.12.13, pandas 3.1.1, polars 2.1.0, pyarrow 26.0.1, scikit-l
 
 | Параметр | Значение |
 | --- | --- |
-| Источник | Hugging Face `openfoodfacts/product-database`, `food.parquet` |
+| Источник | Hugging Face `openfoodfacts/product-database`, `food.parquet`, ревизия `11cc007d7e6709c304405410e4fb23720c4a4aa2` |
 | Получен | 12.11.2026, sha256 `be58c2f3b3987e06c3cb0d87726c0da6c5242e7fb11e331f7e1dfcae8906707c` |
 | Размер | 8 045 833 255 байт (7,49 ГиБ), 4 792 row group |
 | Строк | 4 906 869 (уникальных `code` — 4 906 806) |

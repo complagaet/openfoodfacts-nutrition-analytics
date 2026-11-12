@@ -1,7 +1,16 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-PARQUET_URL = "https://huggingface.co/datasets/openfoodfacts/product-database/resolve/main/food.parquet"
+HF_DATASET = "https://huggingface.co/datasets/openfoodfacts/product-database"
+PINNED_REVISION = "11cc007d7e6709c304405410e4fb23720c4a4aa2"
+PINNED_SHA256 = "be58c2f3b3987e06c3cb0d87726c0da6c5242e7fb11e331f7e1dfcae8906707c"
+
+
+def parquet_url(revision: str) -> str:
+    return f"{HF_DATASET}/resolve/{revision}/food.parquet"
+
+
+PARQUET_URL = parquet_url(PINNED_REVISION)
 CSV_URL = "https://static.openfoodfacts.org/data/en.openfoodfacts.org.products.csv"
 
 SEED = 43

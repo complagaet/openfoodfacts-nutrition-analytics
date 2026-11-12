@@ -46,7 +46,7 @@ make pipeline
 ## Полный прогон на всём снимке
 
 ```bash
-make acquire                     # скачивает food.parquet (7,5 ГиБ) и пишет data/SNAPSHOT.json
+make acquire                     # скачивает food.parquet (7,5 ГиБ) закреплённой ревизии и пишет data/SNAPSHOT.json
 make pipeline PROFILE=full       # ≈4 минуты на MacBook Air M4 / 24 ГБ (сумма замеров этапов)
 make acquire-csv && make csv-audit PROFILE=full   # необязательная проверка CSV-выгрузки (20 МБ)
 ```
@@ -82,7 +82,10 @@ make acquire-csv && make csv-audit PROFILE=full   # необязательная
 
 Данные: [Open Food Facts](https://world.openfoodfacts.org), снимок
 [openfoodfacts/product-database](https://huggingface.co/datasets/openfoodfacts/product-database)
-`food.parquet`, получен 12.11.2026, sha256 `be58c2f3…6707c`.
+`food.parquet`, ревизия `11cc007d7e6709c304405410e4fb23720c4a4aa2` (закреплена в `src/offna/config.py`),
+получен 12.11.2026, sha256 `be58c2f3b3987e06c3cb0d87726c0da6c5242e7fb11e331f7e1dfcae8906707c`.
+`make acquire` скачивает именно эту ревизию и сверяет sha256 с ETag хаба; другая ревизия —
+`.venv/bin/python -I -m offna acquire --source parquet --revision <sha>`.
 База распространяется по [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/),
 содержимое — по Database Contents License. Фикстура `tests/fixtures/off_sample.parquet`
 является производной базой и распространяется на тех же условиях ODbL с указанием
