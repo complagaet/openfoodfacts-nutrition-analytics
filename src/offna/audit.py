@@ -3,7 +3,7 @@ from pathlib import Path
 import polars as pl
 
 from offna.config import CORE_NUTRIENTS, Profile
-from offna.etl import scan_processed
+from offna.etl import empty_list_as_null, scan_processed
 from offna.measure import Stopwatch, peak_rss_mib, read_json, timed, write_json
 
 KEY_FIELDS: list[str] = [*CORE_NUTRIENTS, "nutriscore_grade", "product_name", "brand", "created_at"]
@@ -27,7 +27,9 @@ def overall_missingness(products: pl.LazyFrame) -> pl.DataFrame:
 
 
 def missingness_by_country(products: pl.LazyFrame) -> pl.DataFrame:
-    pairs = products.select("code", "countries_tags", *CORE_NUTRIENTS, "nutriscore_grade").explode("countries_tags")
+    pairs = products.select(
+        "code", empty_list_as_null("countries_tags"), *CORE_NUTRIENTS, "nutriscore_grade"
+    ).explode("countries_tags")
     table = (
         pairs.group_by(pl.col("countries_tags").fill_null("(no country)").alias("country"))
         .agg(pl.len().alias("product_country_pairs"), *missing_share_exprs([*CORE_NUTRIENTS, "nutriscore_grade"]))

@@ -3,7 +3,7 @@ from pathlib import Path
 import polars as pl
 
 from offna.config import CORE_NUTRIENTS, VALID_GRADES, Profile
-from offna.etl import scan_processed
+from offna.etl import empty_list_as_null, scan_processed
 from offna.measure import Stopwatch, peak_rss_mib, timed, write_json
 
 MIN_PRODUCTS_PER_COUNTRY = {"demo": 20, "full": 500}
@@ -11,7 +11,7 @@ DASHBOARD_TABLES: list[str] = ["country_food_group", "grade_counts"]
 
 
 def country_pairs(products: pl.LazyFrame) -> pl.LazyFrame:
-    return products.explode("countries_tags").with_columns(
+    return products.with_columns(empty_list_as_null("countries_tags")).explode("countries_tags").with_columns(
         pl.col("countries_tags").str.replace(r"^en:", "").fill_null("(no country)").alias("country")
     )
 

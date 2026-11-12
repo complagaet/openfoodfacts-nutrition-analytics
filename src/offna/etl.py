@@ -28,6 +28,10 @@ VERSION_TAG_PATTERN = r"^en:nutriscore-2021-([a-e])-2023-([a-e])$"
 LOW_CARDINALITY_SHARE = 0.5
 
 
+def empty_list_as_null(column: str) -> pl.Expr:
+    return pl.when(pl.col(column).list.len() > 0).then(pl.col(column)).alias(column)
+
+
 def iter_raw_batches(path: Path, batch_rows: int) -> Iterator[pl.DataFrame]:
     try:
         parquet = pq.ParquetFile(path)
