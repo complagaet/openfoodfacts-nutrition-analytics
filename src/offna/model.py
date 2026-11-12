@@ -63,6 +63,7 @@ EXTRA_COLUMNS: list[str] = [
     "sodium_100g",
 ]
 TEST_SHARE = 0.2
+HGB_ITERATIONS = 300
 
 
 @dataclass
@@ -140,11 +141,10 @@ def boosting_pipeline() -> Pipeline:
         verbose_feature_names_out=False,
     )
     model = HistGradientBoostingClassifier(
-        max_iter=400,
+        max_iter=HGB_ITERATIONS,
         learning_rate=0.1,
         categorical_features=[len(NUMERIC_FEATURES) + len(FLAG_FEATURES)],
-        early_stopping=True,
-        validation_fraction=0.1,
+        early_stopping=False,
         random_state=SEED,
     )
     return Pipeline([("features", columns), ("model", model)])
