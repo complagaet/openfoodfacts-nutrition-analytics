@@ -65,12 +65,14 @@ def latest_versions(profile: Profile) -> pl.DataFrame:
 
 
 def deduplicate(frame: pl.DataFrame, duplicates: pl.DataFrame, seen: set[str]) -> pl.DataFrame:
-    flagged = frame.join(duplicates, on="code", how="left")
-    keep = flagged.filter(pl.col("latest").is_null() | (pl.col("last_modified_at") == pl.col("latest")))
+    flagged = frame.join(duplicates.with_columns(pl.lit(True).alias("duplicated")), on="code", how="left")
+    is_duplicated = pl.col("duplicated").fill_null(False)
+    is_latest = pl.col("latest").is_null() | (pl.col("last_modified_at") == pl.col("latest"))
+    keep = flagged.filter(~is_duplicated | is_latest)
     keep = keep.unique(subset="code", keep="first", maintain_order=True)
     keep = keep.filter(~pl.col("code").is_in(list(seen)) if seen else pl.lit(True))
-    seen.update(keep.filter(pl.col("latest").is_not_null())["code"].to_list())
-    return keep.drop("latest")
+    seen.update(keep.filter(is_duplicated)["code"].to_list())
+    return keep.drop("latest", "duplicated")
 
 
 def link_table(products: pl.DataFrame, list_column: str, lookup: pl.DataFrame, id_name: str) -> pl.DataFrame:

@@ -1,7 +1,7 @@
 WITH graded_salt AS (
     SELECT
         p.nutriscore_grade AS grade,
-        NTILE(4) OVER (ORDER BY pn.value_100g) AS salt_quartile
+        NTILE(4) OVER (ORDER BY pn.value_100g, p.product_id) AS salt_quartile
     FROM product AS p
     JOIN product_nutrient AS pn ON pn.product_id = p.product_id
     JOIN nutrient AS n ON n.nutrient_id = pn.nutrient_id AND n.name = 'salt_100g'
