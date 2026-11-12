@@ -48,9 +48,7 @@ def _accept(pending: _Pending, stats: ParseStats) -> list[str]:
     return pending.fields
 
 
-def iter_validated_records(
-    lines: Iterable[str], expected_fields: int, stats: ParseStats
-) -> Iterator[list[str]]:
+def iter_validated_records(lines: Iterable[str], expected_fields: int, stats: ParseStats) -> Iterator[list[str]]:
     pending: _Pending | None = None
     for raw in lines:
         stats.physical_lines += 1

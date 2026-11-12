@@ -77,18 +77,23 @@ def derive_columns(frame: pl.DataFrame) -> pl.DataFrame:
     version_tags = pl.col("misc_tags").list.eval(pl.element().filter(pl.element().str.contains(VERSION_TAG_PATTERN)))
     return frame.with_columns(
         _first_text("product_name").alias("product_name"),
-        pl.col("ingredients_text").list.eval(pl.element().struct.field("text").str.len_chars() > 0).list.any()
+        pl.col("ingredients_text")
+        .list.eval(pl.element().struct.field("text").str.len_chars() > 0)
+        .list.any()
         .fill_null(False)
         .alias("has_ingredients_text"),
         pl.col("brands").str.split(",").list.first().str.strip_chars().alias("brand"),
-        _strip_prefix(pl.col("food_groups_tags").list.get(0, null_on_oob=True)).fill_null("unknown").alias("food_group"),
+        _strip_prefix(pl.col("food_groups_tags").list.get(0, null_on_oob=True))
+        .fill_null("unknown")
+        .alias("food_group"),
         _strip_prefix(pl.col("food_groups_tags").list.get(1, null_on_oob=True)).alias("food_group_l2"),
         pl.col("countries_tags").list.len().cast(pl.UInt16).alias("n_countries"),
         pl.col("categories_tags").list.len().cast(pl.UInt16).alias("n_categories"),
         pl.when(grade.is_in(VALID_GRADES)).then(grade).alias("nutriscore_grade"),
-        pl.when(grade.is_in(VALID_GRADES)).then(pl.lit("graded")).otherwise(grade.fill_null("missing")).alias(
-            "nutriscore_status"
-        ),
+        pl.when(grade.is_in(VALID_GRADES))
+        .then(pl.lit("graded"))
+        .otherwise(grade.fill_null("missing"))
+        .alias("nutriscore_status"),
         pl.col("nutriscore_score").cast(pl.Int16),
         pl.col("nova_group").cast(pl.Int8),
         pl.col("additives_n").cast(pl.Int16),
@@ -117,9 +122,9 @@ def derive_columns(frame: pl.DataFrame) -> pl.DataFrame:
 
 def harmonise_units(frame: pl.DataFrame) -> pl.DataFrame:
     return frame.with_columns(
-        pl.coalesce(
-            "energy_kj_declared_100g", "energy_100g", pl.col("energy_kcal_100g") * KJ_PER_KCAL
-        ).cast(pl.Float32).alias("energy_kj_100g"),
+        pl.coalesce("energy_kj_declared_100g", "energy_100g", pl.col("energy_kcal_100g") * KJ_PER_KCAL)
+        .cast(pl.Float32)
+        .alias("energy_kj_100g"),
         pl.coalesce("salt_100g", pl.col("sodium_100g") * SALT_PER_SODIUM).cast(pl.Float32).alias("salt_100g"),
     ).drop("energy_kj_declared_100g", "energy_100g")
 
@@ -169,10 +174,16 @@ def apply_cleaning(frame: pl.DataFrame, rules: dict[str, pl.Expr]) -> pl.DataFra
         for name in ["saturated_fat_above_fat", "sugars_above_carbohydrates", "macros_sum_over_105g"]
     ).alias("n_consistency_flags")
     bad_date = rules["created_before_off_launch"] | rules["created_after_snapshot"]
-    dates = [_nullify_when("created_at", bad_date), _nullify_when("last_modified_at", rules["created_after_snapshot"])]
-    return frame.with_columns(flags).with_columns(*impossible_value, *energy, *dates).filter(
-        ~rules["missing_code"].fill_null(False)
-    ).with_columns(pl.col("created_at").dt.year().cast(pl.Int16).alias("created_year"))
+    dates = [
+        _nullify_when("created_at", bad_date),
+        _nullify_when("last_modified_at", rules["created_after_snapshot"]),
+    ]
+    return (
+        frame.with_columns(flags)
+        .with_columns(*impossible_value, *energy, *dates)
+        .filter(~rules["missing_code"].fill_null(False))
+        .with_columns(pl.col("created_at").dt.year().cast(pl.Int16).alias("created_year"))
+    )
 
 
 def transform_batch(frame: pl.DataFrame, rules: dict[str, pl.Expr]) -> tuple[pl.DataFrame, Counter]:

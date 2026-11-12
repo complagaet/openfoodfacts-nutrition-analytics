@@ -11,8 +11,10 @@ DASHBOARD_TABLES: list[str] = ["country_food_group", "grade_counts"]
 
 
 def country_pairs(products: pl.LazyFrame) -> pl.LazyFrame:
-    return products.with_columns(empty_list_as_null("countries_tags")).explode("countries_tags").with_columns(
-        pl.col("countries_tags").str.replace(r"^en:", "").fill_null("(no country)").alias("country")
+    return (
+        products.with_columns(empty_list_as_null("countries_tags"))
+        .explode("countries_tags")
+        .with_columns(pl.col("countries_tags").str.replace(r"^en:", "").fill_null("(no country)").alias("country"))
     )
 
 

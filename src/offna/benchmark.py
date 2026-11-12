@@ -103,7 +103,10 @@ def environment() -> dict:
 
 
 def markdown_table(results: dict) -> str:
-    lines = ["| input | engine | rows | median s | min s | first run s | peak RSS MiB |", "|---|---|---:|---:|---:|---:|---:|"]
+    lines = [
+        "| input | engine | rows | median s | min s | first run s | peak RSS MiB |",
+        "|---|---|---:|---:|---:|---:|---:|",
+    ]
     for label, block in results.items():
         for row in block["engines"]:
             lines.append(

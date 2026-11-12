@@ -27,12 +27,15 @@ def overall_missingness(products: pl.LazyFrame) -> pl.DataFrame:
 
 
 def missingness_by_country(products: pl.LazyFrame) -> pl.DataFrame:
-    pairs = products.select(
-        "code", empty_list_as_null("countries_tags"), *CORE_NUTRIENTS, "nutriscore_grade"
-    ).explode("countries_tags")
+    pairs = products.select("code", empty_list_as_null("countries_tags"), *CORE_NUTRIENTS, "nutriscore_grade").explode(
+        "countries_tags"
+    )
     table = (
         pairs.group_by(pl.col("countries_tags").fill_null("(no country)").alias("country"))
-        .agg(pl.len().alias("product_country_pairs"), *missing_share_exprs([*CORE_NUTRIENTS, "nutriscore_grade"]))
+        .agg(
+            pl.len().alias("product_country_pairs"),
+            *missing_share_exprs([*CORE_NUTRIENTS, "nutriscore_grade"]),
+        )
         .sort("product_country_pairs", descending=True)
         .collect(engine="streaming")
     )
@@ -74,11 +77,15 @@ def duplicate_summary(products: pl.LazyFrame) -> dict:
 def outlier_counts(products: pl.LazyFrame) -> pl.DataFrame:
     rows = []
     for column in CORE_NUTRIENTS:
-        stats = products.select(
-            pl.col(column).quantile(0.25).alias("q1"),
-            pl.col(column).quantile(0.75).alias("q3"),
-            pl.col(column).max().alias("max"),
-        ).collect(engine="streaming").row(0, named=True)
+        stats = (
+            products.select(
+                pl.col(column).quantile(0.25).alias("q1"),
+                pl.col(column).quantile(0.75).alias("q3"),
+                pl.col(column).max().alias("max"),
+            )
+            .collect(engine="streaming")
+            .row(0, named=True)
+        )
         if stats["q1"] is None:
             continue
         upper = stats["q3"] + OUTLIER_IQR_FACTOR * (stats["q3"] - stats["q1"])
@@ -90,7 +97,10 @@ def outlier_counts(products: pl.LazyFrame) -> pl.DataFrame:
 def date_summary(products: pl.LazyFrame) -> pl.DataFrame:
     return (
         products.group_by("created_year")
-        .agg(pl.len().alias("products"), pl.col("nutriscore_grade").is_not_null().mean().round(4).alias("graded_share"))
+        .agg(
+            pl.len().alias("products"),
+            pl.col("nutriscore_grade").is_not_null().mean().round(4).alias("graded_share"),
+        )
         .sort("created_year")
         .collect(engine="streaming")
     )
@@ -125,7 +135,10 @@ def nutrient_inventory(raw_path: Path) -> pl.DataFrame:
     lazy = pl.scan_parquet(raw_path)
     listed = lazy.select(names).explode("nutrient").group_by("nutrient").agg(pl.len().alias("products_listing"))
     valued = (
-        lazy.select(per_100g.alias("nutrient")).explode("nutrient").group_by("nutrient").agg(pl.len().alias("products_with_100g"))
+        lazy.select(per_100g.alias("nutrient"))
+        .explode("nutrient")
+        .group_by("nutrient")
+        .agg(pl.len().alias("products_with_100g"))
     )
     return (
         listed.join(valued, on="nutrient", how="left")
