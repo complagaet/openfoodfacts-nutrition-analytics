@@ -1,5 +1,7 @@
 # Open Food Facts: Nutrition and Product Analytics
 
+[![CI](https://github.com/complagaet/openfoodfacts-nutrition-analytics/actions/workflows/ci.yml/badge.svg)](https://github.com/complagaet/openfoodfacts-nutrition-analytics/actions/workflows/ci.yml)
+
 Итоговый проект №43 по дисциплине **Programming for Data Analysis and Database**
 (название курса взято из исходного задания; см. «Открытые вопросы»).
 Кластер 8: **Large-Scale Data Processing (Pandas, Polars, Dask, Parquet)**.
