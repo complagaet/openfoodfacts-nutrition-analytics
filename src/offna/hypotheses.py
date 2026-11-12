@@ -13,7 +13,8 @@ H1_MIN_PRODUCTS_PER_CELL = 200
 H1_MIN_EFFECT_V = 0.1
 H2_MIN_PER_ARM = 30
 BOOTSTRAP_RESAMPLES = 1000
-BOOTSTRAP_MAX_PER_ARM = 5000
+MIN_EXPECTED_COUNT = 5
+GRADE_BANDS: dict[str, list[str]] = {"ab": ["a", "b"], "c": ["c"], "de": ["d", "e"]}
 
 H1_PROTOCOL = (
     "Unit: products sold in exactly one country (avoids counting one product several times), known food group, "
@@ -27,7 +28,9 @@ H2_PROTOCOL = (
     "not 'unknown'. Strata: level-2 food groups (comparable categories) with >= "
     f"{H2_MIN_PER_ARM} products in each arm. Sugars: two-sided Mann-Whitney U, effect = median difference "
     f"(sweetener - none) with bootstrap 95% CI ({BOOTSTRAP_RESAMPLES} resamples, seed {SEED}) and rank-biserial r. "
-    "Nutri-Score: chi-square sweetener x grade on graded products, Cramer's V. Holm correction within each family."
+    "Bootstrap uses every observation of both arms. Nutri-Score: chi-square sweetener x grade on graded products "
+    f"when all expected counts are >= {MIN_EXPECTED_COUNT}; otherwise grades are merged into AB/C/DE, and the "
+    "stratum is skipped if that is still too sparse. Cramer's V, Holm correction within each family."
 )
 
 
@@ -117,8 +120,6 @@ def h2_frame(products: pl.LazyFrame) -> pd.DataFrame:
 def bootstrap_median_difference(
     treated: np.ndarray, control: np.ndarray, rng: np.random.Generator
 ) -> tuple[float, float]:
-    treated = rng.choice(treated, size=min(len(treated), BOOTSTRAP_MAX_PER_ARM), replace=False)
-    control = rng.choice(control, size=min(len(control), BOOTSTRAP_MAX_PER_ARM), replace=False)
     draws = [
         np.median(rng.choice(treated, len(treated))) - np.median(rng.choice(control, len(control)))
         for _ in range(BOOTSTRAP_RESAMPLES)
@@ -148,20 +149,43 @@ def h2_sugar_test(group: pd.DataFrame, rng: np.random.Generator) -> dict | None:
     }
 
 
+def _min_expected(table: pd.DataFrame) -> float:
+    return float(chi2_contingency(table.to_numpy(), correction=False)[3].min())
+
+
+def chi2_ready_table(table: pd.DataFrame) -> tuple[str, pd.DataFrame | None]:
+    table = table.loc[:, table.sum(axis=0) > 0]
+    if _min_expected(table) >= MIN_EXPECTED_COUNT:
+        return "chi2_5_grades", table
+    merged = pd.DataFrame(
+        {band: table.reindex(columns=grades, fill_value=0).sum(axis=1) for band, grades in GRADE_BANDS.items()}
+    )
+    merged = merged.loc[:, merged.sum(axis=0) > 0]
+    if merged.shape[1] >= 2 and _min_expected(merged) >= MIN_EXPECTED_COUNT:
+        return "chi2_merged_ab_c_de", merged
+    return "skipped_expected_below_5", None
+
+
 def h2_grade_test(group: pd.DataFrame) -> dict | None:
     graded = group[group["nutriscore_grade"].isin(VALID_GRADES)]
     table = pd.crosstab(graded["with_non_nutritive_sweeteners"], graded["nutriscore_grade"])
     if table.shape[0] < 2 or table.sum(axis=1).min() < H2_MIN_PER_ARM:
         return None
-    table = table.loc[:, table.sum(axis=0) > 0]
+    method, tested = chi2_ready_table(table)
     shares = table.div(table.sum(axis=1), axis=0)
-    return {
+    summary = {
         "graded_sweetener": int(table.loc[1].sum()),
         "graded_none": int(table.loc[0].sum()),
         "share_ab_sweetener": round(float(shares.loc[1, [g for g in ["a", "b"] if g in shares]].sum()), 4),
         "share_ab_none": round(float(shares.loc[0, [g for g in ["a", "b"] if g in shares]].sum()), 4),
-        "grade_cramers_v": round(cramers_v(table.to_numpy()), 4),
-        "grade_p_value": float(chi2_contingency(table.to_numpy(), correction=False)[1]),
+        "grade_test": method,
+    }
+    if tested is None:
+        return summary
+    return {
+        **summary,
+        "grade_cramers_v": round(cramers_v(tested.to_numpy()), 4),
+        "grade_p_value": float(chi2_contingency(tested.to_numpy(), correction=False)[1]),
     }
 
 
@@ -190,5 +214,6 @@ def test_h2(products: pl.LazyFrame, output_dir: Path) -> dict:
         "sugar_significant_groups": len(significant),
         "sugar_lower_with_sweetener_groups": int((significant["median_difference"] < 0).sum()),
         "grade_significant_groups": int((table.get("grade_p_holm", pd.Series(dtype=float)) < ALPHA).sum()),
+        "grade_test_methods": table.get("grade_test", pd.Series(dtype=str)).value_counts().to_dict(),
         "verdict": "supported" if len(significant) * 2 > len(table) else "not supported",
     }
