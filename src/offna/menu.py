@@ -83,7 +83,7 @@ def run_query(profile: Profile, read: Reader, write: Writer) -> None:
     choice = int(ask_number(read, write, "Query number", len(files)))
     if choice == 0:
         return
-    with sqlite3.connect(f"file:{profile.sqlite_path}?mode=ro", uri=True) as connection:
+    with sqlite3.connect(profile.sqlite_path.resolve().as_uri() + "?mode=ro", uri=True) as connection:
         frame = pd.read_sql_query(files[choice - 1].read_text(encoding="utf-8"), connection)
     write(frame.head(15).to_string(index=False))
 
@@ -123,5 +123,5 @@ def run_menu(profile: Profile, read: Reader = input, write: Writer = print) -> N
         choice = read("Choose: ").strip()
         try:
             running = handle(choice, profile, read, write)
-        except (AggregatesMissingError, FileNotFoundError, sqlite3.OperationalError) as error:
+        except (AggregatesMissingError, FileNotFoundError, sqlite3.Error, pd.errors.DatabaseError) as error:
             write(f"cannot do that yet: {error}")

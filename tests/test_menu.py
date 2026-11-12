@@ -38,3 +38,17 @@ def test_sql_option_does_not_create_an_empty_database(tmp_path) -> None:
     run_menu(profile, scripted(["4", "0"]), messages.append)
     assert not profile.sqlite_path.exists()
     assert any("cannot do that yet" in message for message in messages)
+
+
+def test_sql_option_works_with_hash_in_path(tmp_path) -> None:
+    import sqlite3
+
+    data_dir = tmp_path / "my dir#1?x"
+    profile = Profile("demo", tmp_path / "raw.parquet", data_dir, tmp_path / "outputs")
+    data_dir.mkdir()
+    with sqlite3.connect(profile.sqlite_path) as connection:
+        connection.execute("CREATE TABLE product (product_id INTEGER, nutriscore_grade TEXT)")
+    messages: list[str] = []
+    run_menu(profile, scripted(["4", "1", "0"]), messages.append)
+    output = "\n".join(messages)
+    assert "no such table: product_country" in output
