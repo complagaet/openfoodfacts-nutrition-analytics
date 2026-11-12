@@ -82,6 +82,12 @@ def stage_eda(args: argparse.Namespace) -> dict:
     return run_eda(_profile(args))
 
 
+def stage_slides(args: argparse.Namespace) -> dict:
+    from offna.slides import build_slides
+
+    return build_slides()
+
+
 def stage_pipeline(args: argparse.Namespace) -> dict:
     summary = {}
     for name in PIPELINE_STAGES:
@@ -109,6 +115,7 @@ STAGES: dict[str, Callable[[argparse.Namespace], dict]] = {
     "eda": stage_eda,
     "pipeline": stage_pipeline,
     "menu": stage_menu,
+    "slides": stage_slides,
 }
 
 

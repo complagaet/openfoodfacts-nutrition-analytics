@@ -6,11 +6,11 @@ BATCH_ROWS_full = 250000
 SUBSET_ROWS_demo = 10000
 SUBSET_ROWS_full = 1000000
 
-.PHONY: setup acquire acquire-csv fixture etl audit csv-audit aggregates benchmark sql model eda pipeline app menu test lint
+.PHONY: slides setup acquire acquire-csv fixture etl audit csv-audit aggregates benchmark sql model eda pipeline app menu test lint
 
 setup:
 	uv venv --python 3.12 .venv
-	uv pip install --python $(PYTHON) -r requirements.txt
+	uv pip install --python $(PYTHON) -r requirements-dev.txt
 	uv pip install --python $(PYTHON) --no-deps -e .
 
 acquire:
@@ -50,6 +50,9 @@ pipeline: etl audit aggregates benchmark sql model eda
 
 app:
 	$(PYTHON) -m streamlit run app.py
+
+slides:
+	$(RUN) slides
 
 menu:
 	$(RUN) menu --profile $(PROFILE)
