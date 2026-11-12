@@ -29,3 +29,12 @@ def test_menu_handles_unknown_option_and_manual_score(tmp_path) -> None:
 
 def test_holm_adjustment_is_monotone_and_capped() -> None:
     assert holm_adjust([0.01, 0.04, 0.03]) == [0.03, 0.06, 0.06]
+
+
+def test_sql_option_does_not_create_an_empty_database(tmp_path) -> None:
+    profile = Profile("demo", tmp_path / "raw.parquet", tmp_path / "data", tmp_path / "outputs")
+    profile.data_dir.mkdir()
+    messages: list[str] = []
+    run_menu(profile, scripted(["4", "0"]), messages.append)
+    assert not profile.sqlite_path.exists()
+    assert any("cannot do that yet" in message for message in messages)
