@@ -10,7 +10,7 @@ import polars as pl
 import psutil
 import pyarrow as pa
 
-from offna.config import CORE_NUTRIENTS, Profile
+from offna.config import CORE_NUTRIENTS, SEED, Profile
 from offna.engines import BENCH_COLUMNS, ENGINES, frames_match
 from offna.etl import scan_processed
 from offna.measure import frame_memory_mib, peak_rss_mib, write_json
@@ -21,16 +21,21 @@ WORKER_TIMEOUT_SECONDS = 1800
 
 
 def write_subset(profile: Profile, rows: int) -> dict:
-    subset = (
+    products = (
         scan_processed(profile)
         .select(BENCH_COLUMNS)
-        .head(rows)
         .with_columns(pl.col(CORE_NUTRIENTS).cast(pl.Float64), pl.col("food_group").cast(pl.String))
         .collect(engine="streaming")
     )
+    subset = products.sample(n=min(rows, products.height), seed=SEED)
+    del products
     profile.bench_subset_path.parent.mkdir(parents=True, exist_ok=True)
     subset.write_parquet(profile.bench_subset_path, compression="zstd")
-    return {"rows": subset.height, "file_mib": round(profile.bench_subset_path.stat().st_size / 2**20, 2)}
+    return {
+        "rows": subset.height,
+        "sampling": f"uniform random sample without replacement, seed {SEED}",
+        "file_mib": round(profile.bench_subset_path.stat().st_size / 2**20, 2),
+    }
 
 
 def run_worker(engine: str, source: Path, output_dir: Path) -> dict:
