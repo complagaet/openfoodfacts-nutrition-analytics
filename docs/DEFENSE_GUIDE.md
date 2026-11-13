@@ -8,7 +8,7 @@ How to use this guide. Part 0 builds the mental models from zero and traces one 
 
 Source tags used below: numbers come from `docs/results/*.json` and `docs/results/tables/*.csv` (the full run on the 4.9 million product snapshot), from `docs/REPORT.md` where it quotes them, or from a command I ran fresh while writing (marked "fresh run"). Where I could not verify something, the text says so.
 
-Fresh run while writing this guide (clean worktree, fixture data): `make setup`, `make pipeline` (about 50 seconds wall time), `make test` (51 passed in 5.99 s), `make lint` (ruff check: all checks passed; ruff format: 43 files already formatted). I did not run the full 7.5 GiB pipeline, `make acquire`, `make csv-audit`, `make app`, `make menu` or `make slides`; the full-run numbers are the committed results.
+Fresh run while writing this guide (clean worktree, fixture data): `make setup`, `make pipeline` (about 50 seconds wall time on a cold start, 18 s warm), `make test` (53 passed in 3.73 s), `make lint` (ruff check: all checks passed; ruff format: 45 files already formatted), `make slides`. I did not run the full 7.5 GiB pipeline, `make acquire`, `make csv-audit`, `make app` or `make menu`; the full-run numbers are the committed results.
 
 ---
 
@@ -111,7 +111,7 @@ If the committee gives 10 to 15 minutes, expand steps 5, 8 and 9; those are wher
 
 # Part 1. The project in 60 seconds
 
-"We took the full Open Food Facts snapshot, 4.9 million products and 7.5 GiB, and built a reproducible pipeline around it. We pin the exact dataset revision and verify its sha256. We read it in chunks, keep 26 of 111 columns, flatten the nested nutrient list, fix units, flag or null impossible values, and write partitioned Parquet; with type optimisation a DataFrame shrinks from 257.6 to 121.3 MiB. We audit quality by country and food group, and we compare three engines on identical tasks in separate processes: plain Pandas, chunked Pandas and Polars lazy. Results are equal to 1e-13, Polars is 14 to 23 times faster than chunked Pandas, and chunked Pandas uses half the peak memory of plain Pandas. We load a normalised SQLite database and answer questions with 10 SQL queries. We test two hypotheses with proper statistics: completeness of nutrition data differs by country even within the same food group, and sweetener products differ in sugar and Nutri-Score. Finally we predict Nutri-Score A to E. We proved the labels follow the 2023 formula, ported that formula as a rule baseline (macro-F1 0.948), and compared it with logistic regression (0.765) and gradient boosting (0.930) on a test set split by product group so there is no leakage. Everything is reproducible with `make setup && make pipeline`, tested in CI, and explorable in a Streamlit dashboard and a console menu."
+"We took the full Open Food Facts snapshot, 4.9 million products and 7.5 GiB, and built a reproducible pipeline around it. We pin the exact dataset revision and verify its sha256. We read it in chunks, keep 26 of 111 columns, flatten the nested nutrient list, fix units, flag or null impossible values, and write partitioned Parquet; with type optimisation a DataFrame shrinks from 257.6 to 121.3 MiB. We audit quality by country and food group, and we compare three engines on identical tasks in separate processes: plain Pandas, chunked Pandas and Polars lazy. Results are equal to 1e-13, Polars is 14 to 23 times faster than chunked Pandas (12 times faster than plain Pandas), chunked Pandas uses half the peak memory of plain Pandas, and on the full snapshot chunked Pandas still peaks lower than Polars (410 versus 625 MiB). We load a normalised SQLite database and answer questions with 10 SQL queries. We test two hypotheses with proper statistics: completeness of nutrition data differs by country even within the same food group, and sweetener products differ in sugar and Nutri-Score. Finally we predict Nutri-Score A to E. We proved the labels follow the 2023 formula, ported that formula as a rule baseline (macro-F1 0.948), and compared it with logistic regression (0.765) and gradient boosting (0.930) on a test set split by product group so there is no leakage. Everything is reproducible with `make setup && make pipeline`, tested in CI, and explorable in a Streamlit dashboard and a console menu."
 
 (Numbers: benchmark.json, etl_report.json, model_report.json, eda_report.json.)
 
@@ -131,7 +131,7 @@ flowchart LR
     D --> J
 ```
 
-`make pipeline` runs, in order: etl, audit, aggregates, benchmark, sql, model, eda (Makefile target `pipeline`). Side branches: `make acquire-csv` and `make csv-audit` (the CSV experiment), `make fixture` (rebuild the demo sample), `make slides`, `make test`, `make lint`. Note that `cli.py` has its own `PIPELINE_STAGES` list for `python -m offna pipeline`, which omits `benchmark`; `make pipeline` is the one the README and CI use.
+`make pipeline` runs, in order: etl, audit, aggregates, benchmark, sql, model, eda (Makefile target `pipeline`). Side branches: `make acquire-csv` and `make csv-audit` (the CSV experiment), `make fixture` (rebuild the demo sample), `make slides`, `make test`, `make lint`. The CLI command `pipeline` (`cli.py::PIPELINE_STAGES`) runs the same seven stages in the same order; `tests/test_cli.py` fails if it drifts from the Makefile target.
 
 Everything downstream of ETL reads the same cleaned Parquet in `data/<profile>/processed/`. That is the design principle: raw data is touched once, everything else works on the typed, partitioned copy.
 
@@ -209,7 +209,7 @@ Cleaning rules (counts are before cleaning, from `etl_report.json`):
 
 **Key numbers** [etl_report.json]. Full ETL 28.38 s; peak RSS 3,582 MiB; 240 partition files (about 264 MB in total with zstd, from REPORT). First batch (250,000 rows x 53 columns): 257.56 MiB with default pandas types versus 121.33 MiB optimised (-53%). Be exact about this: the "before" column is pandas default types (float64, int64, object strings) simulated by `default_pandas_frame`, measured with `memory_usage(deep=True)`; it is the size of the DataFrame, not the process.
 
-Report inconsistency to know about: README says no stage exceeds 3.6 "ГБ", while the JSON says 3,582 MiB, which is 3.5 GiB or 3.76 GB. Say "about 3.5 GiB" and cite the JSON.
+Units: 3,582 MiB is 3.5 GiB (or 3.76 decimal GB). README, REPORT, SLIDES and RUBRIC_MAP all quote "3 582 МиБ (3,5 ГиБ)"; it is the highest peak of any full-run stage (model 2,441 MiB, benchmark orchestrator 1,291 MiB, audit 1,208 MiB, SQL 1,106 MiB).
 
 I do not know exactly which part of the pipeline makes the ETL peak 3.5 GiB despite batching; the report does not break it down. A plausible reason is the nested list columns and Arrow buffers of a 250,000-row batch, but that is my guess, not a measurement.
 
@@ -269,7 +269,7 @@ I do not know exactly which part of the pipeline makes the ETL peak 3.5 GiB desp
 | full, 4,906,867 rows | pandas chunked, optimised | 4.314 | 409.5 |
 | full, 4,906,867 rows | Polars lazy | 0.187 | 624.5 |
 
-Derived ratios (my arithmetic from the table): chunked Pandas uses 0.49 of plain Pandas' peak memory (424.7/869.4) and is 14% slower (0.684/0.600). Polars lazy is 12x faster than plain Pandas, 14x faster than chunked Pandas on the subset, and 23x faster on the full snapshot (4.314/0.187). The report's "14 to 23 times" refers to chunked Pandas versus Polars. Note that on the full snapshot Polars used more peak memory than chunked Pandas (624.5 versus 409.5 MiB): Polars wins on time, chunked Pandas on memory. Results are equal: T1 exactly, T2 within 1.1e-13 [REPORT]. DataFrame size of the subset: 212.1 MiB default versus 165.6 MiB with float32/category [benchmark.json]. The peak RSS includes roughly 130 MiB for the interpreter and libraries [REPORT]. First-run and median times are about equal, so file cache did not distort results here (the report says the cache is warm after the first run).
+Derived ratios (my arithmetic from the table): chunked Pandas uses 0.49 of plain Pandas' peak memory (424.7/869.4) and is 14% slower (0.684/0.600). Polars lazy is 12x faster than plain Pandas, 14x faster than chunked Pandas on the subset, and 23x faster on the full snapshot (4.314/0.187). REPORT and SLIDES state the same baselines (14x and 23x against chunked Pandas, 12x against default Pandas on the subset) together with the memory cost. On the full snapshot Polars used more peak memory than chunked Pandas (624.5 versus 409.5 MiB): Polars wins on time, chunked Pandas on memory. Results are equal: T1 exactly, T2 within 1.1e-13 [REPORT]. DataFrame size of the subset: 212.1 MiB default versus 165.6 MiB with float32/category [benchmark.json]. The peak RSS includes roughly 130 MiB for the interpreter and libraries [REPORT]. First-run and median times are about equal, so file cache did not distort results here (the report says the cache is warm after the first run).
 
 Trap found: in Polars 2, `explode` drops rows whose list is empty, while pandas turns them into NaN; without a fix, products with no country vanished (15 instead of 43 on the demo, per report). `empty_list_as_null` converts empty lists to NULL before exploding. This is a good story: the equality test found a real semantic difference between engines.
 
@@ -326,7 +326,7 @@ A pitfall to mention: joining two many-to-many links at once multiplies rows (a 
 
 **Where in the code.** `sql/schema.sql`, `sql/indexes.sql`, `sql/q01_*.sql` to `q10_*.sql`; `database.py` (`create_database`, `Loader`, `TagLookup`, `deduplicate`, `link_table`, `nutrient_long`, `run_queries`, `run_sql_stage`); `tests/test_database.py`; ER diagram in `docs/DATABASE.md`.
 
-**Key numbers** [sql_report.json]. Rows: `product` 4,906,806 (61 duplicate barcodes collapsed to the latest version), `product_country` 5,172,813, `product_category` 10,806,905, `product_nutrient` 28,909,738, `category` 124,648, `country` 501, `food_group` 12, `nutrient` 9. Database file 1,644.8 MiB; load 89.98 s; stage peak RSS 1,106.4 MiB. Query times in `sql_report.json`: q01 1.64 s, q02 3.10, q03 5.66, q04 5.78, q05 1.22, q06 0.71, q07 2.57, q08 1.47, q09 2.20, q10 0.41. Note: `docs/DATABASE.md` quotes slightly different figures (load 87 s, query times such as 1.8 and 6.1 s, peak RSS 1.3 GB), apparently from another run; quote the JSON.
+**Key numbers** [sql_report.json]. Rows: `product` 4,906,806 (61 duplicate barcodes collapsed to the latest version), `product_country` 5,172,813, `product_category` 10,806,905, `product_nutrient` 28,909,738, `category` 124,648, `country` 501, `food_group` 12, `nutrient` 9. Database file 1,644.8 MiB; load 89.98 s; stage peak RSS 1,106.4 MiB. Query times in `sql_report.json`: q01 1.64 s, q02 3.10, q03 5.66, q04 5.78, q05 1.22, q06 0.71, q07 2.57, q08 1.47, q09 2.20, q10 0.41. `docs/DATABASE.md` quotes the same figures, rounded to one decimal (load 90.0 s, peak RSS 1,106 MiB, file 1,645 MiB).
 
 Findings from the queries (REPORT section 5 and result tables): grade E share is 32.2% for products sold in the USA and 28.4% in France (q02); among NOVA group 1 (unprocessed) 57.0% are grade A, among NOVA 4 (ultra-processed) 6.8% are A and 35.9% are E (q10; I confirmed the NOVA 1 value, 0.5699, in `q10_nova_vs_grade.csv`); the food group "fish, meat, eggs" has the highest mean salt, 1.951 g/100 g (q07); products sold in 3 or more countries are under 3% of any group (q08).
 
@@ -405,7 +405,7 @@ Why the rule is not 100%: OFF identifies nuts and red meat through customs-code 
 | HistGradientBoosting | 0.930 | 0.937 | 25.28 | 2.868 | 5,477,422 |
 | Rule 2023 | 0.948 | 0.956 | - | - | - |
 
-On all labelled test rows (287,815): LR 0.761, HGB 0.926. Per-class F1 of HGB: A 0.946, B 0.879, C 0.911, D 0.945, E 0.967; LR: A 0.844, B 0.559, C 0.720, D 0.805, E 0.897. Stage peak RSS 2,441 MiB. Be careful with one detail: the saved confusion matrices for models are on the whole test set (287,815), while the rule's is on the covered cohort (281,050), so cell counts are not directly comparable.
+On all labelled test rows (287,815): LR 0.761, HGB 0.926. Per-class F1 of HGB: A 0.946, B 0.879, C 0.911, D 0.945, E 0.967; LR: A 0.844, B 0.559, C 0.720, D 0.805, E 0.897. Stage peak RSS 2,441 MiB. The saved confusion matrices for models are on the whole test set (287,815), while the rule's is on the covered cohort (281,050), so cell counts are not directly comparable; REPORT 7.3 and slide 11 say so. Compare methods by the metrics on the common cohort, not by matrix cells.
 
 Interpretation to say aloud: the rule is the ceiling at 0.948; HGB gets close (0.930) because trees mimic thresholds; LR is far behind because the formula is non-linear; dummies show the floor. Models are not expected to beat a correct formula. The model's value is that it works without OFF's taxonomy, but its predictions on incomplete records are not validated by any independent label.
 
@@ -494,7 +494,7 @@ Interpretation to say aloud: the rule is the ceiling at 0.948; HGB gets close (0
 
 **Where in the code.** `tests/`, `.github/workflows/ci.yml`, `Makefile`, `pyproject.toml` (ruff and pytest config).
 
-**Key numbers** [fresh run]. `make test`: 51 passed in 5.99 s. `make lint`: ruff check passed, 43 files already formatted. `make pipeline` on the fixture: about 50 seconds.
+**Key numbers** [fresh run]. `make test`: 53 passed in 3.73 s. `make lint`: ruff check passed, 45 files already formatted. `make pipeline` on the fixture: about 50 seconds.
 
 **How to demo it.** `make test` and `make lint`; open the Actions tab on GitHub for the latest run (I did not check the remote status of the last run).
 
@@ -544,7 +544,7 @@ Say these before you are asked; they are cheaper volunteered than extracted.
 - **Peak memory in ETL is 3.5 GiB,** bounded by batch size but not small; the contributors were not profiled.
 - **No comments in code** versus the rubric wording (see Part 4).
 - **Open administrative items** (README "Открытые вопросы"): course name differs between sources, topic approval and exam date not confirmed, repository access for the instructor, the contribution table is `_TBD_`, our own code licence is not chosen.
-- **Report inconsistencies I found** (be aware, do not repeat them blindly): README says peak RSS is below "3,6 ГБ" while the JSON says 3,582 MiB (3.5 GiB); `docs/DATABASE.md` quotes a 87 s load, 1.3 GB peak and slightly different query times than `sql_report.json` (89.98 s, 1,106 MiB; q01 1.64 s versus 1.8 s). Use the JSON. The REPORT says "11 numeric nutrient features" while the list includes two fruit/vegetable estimates; harmless but be precise.
+- **Documents and results agree.** README, REPORT, SLIDES, DATABASE and RUBRIC_MAP were reconciled with `docs/results` (peak RSS in MiB/GiB, SQL timings, speed-up baselines, confusion-matrix cohorts, the q06 peak year). If a committee member quotes a different number, the JSON in `docs/results` is the source of truth. Two figures in the REPORT are not in any JSON and cannot be rechecked without the full data: the 264 MB size of the partitioned Parquet and the "about 130 MiB" interpreter share of peak RSS.
 - **Demo-versus-full:** on the fixture, H1/H2 are "not testable" and model scores differ. Never mix.
 
 ---
@@ -673,7 +673,7 @@ make lint
 make app
 ```
 
-Expect: `make pipeline` about a minute on the fixture, `make test` 51 passed, `make lint` clean, the app on http://localhost:8501. Requirements: Python 3.12 and `uv` (or `python3.12 -m venv .venv` and `.venv/bin/pip install -r requirements-dev.txt`). If anything fails, the program must still be demonstrable: criteria 1 and 6 cap at Fail if it does not run.
+Expect: `make pipeline` about a minute on the fixture, `make test` 53 passed, `make lint` clean, the app on http://localhost:8501. Requirements: Python 3.12 and `uv` (or `python3.12 -m venv .venv` and `.venv/bin/pip install -r requirements-dev.txt`). If anything fails, the program must still be demonstrable: criteria 1 and 6 cap at Fail if it does not run.
 
 **Open before you start.**
 - Terminal in the repo with the pipeline already run, and the Streamlit tab open on the demo profile.
