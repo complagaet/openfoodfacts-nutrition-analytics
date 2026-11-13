@@ -84,6 +84,7 @@ make acquire-csv && make csv-audit PROFILE=full   # необязательная
 - [Схема БД и запросы](docs/DATABASE.md)
 - [Карта критериев оценки → код → подтверждение](docs/RUBRIC_MAP.md)
 - [Критерии оценки](docs/ASSESSMENT.md), [описание проекта](docs/PROJECT_BRIEF.md), [источники](docs/SOURCES.md)
+- [Руководство для подготовки к защите (English)](docs/DEFENSE_GUIDE.md)
 
 ## Данные и лицензия
 
