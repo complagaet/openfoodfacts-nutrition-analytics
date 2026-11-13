@@ -6,7 +6,7 @@ from pathlib import Path
 
 from offna.config import CSV_URL, FIXTURE_PATH, PINNED_REVISION, PROFILES, Profile, get_profile, parquet_url
 
-PIPELINE_STAGES: list[str] = ["etl", "audit", "aggregates", "sql", "model", "eda"]
+PIPELINE_STAGES: list[str] = ["etl", "audit", "aggregates", "benchmark", "sql", "model", "eda"]
 
 
 def _print(payload: dict) -> None:
