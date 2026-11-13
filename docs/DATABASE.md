@@ -2,7 +2,7 @@
 
 Схема — [`sql/schema.sql`](../sql/schema.sql), индексы — [`sql/indexes.sql`](../sql/indexes.sql),
 загрузчик — `src/offna/database.py` (`make sql`). База строится из партиционированного
-Parquet потоково, по одному файлу партиции, поэтому пик RSS на полном снимке — 1,3 ГБ.
+Parquet потоково, по одному файлу партиции, поэтому пик RSS этапа на полном снимке — 1 106 МиБ (1,1 ГиБ).
 
 ## ER-диаграмма
 
@@ -85,7 +85,7 @@ erDiagram
 | food_group | 12 |
 | nutrient | 9 |
 
-Файл БД — 1,6 ГБ, загрузка — 87 с.
+Файл БД — 1 645 МиБ (1,6 ГиБ), загрузка — 90,0 с (`sql_report.json`).
 
 ## Запросы
 
@@ -94,15 +94,15 @@ erDiagram
 
 | Файл | Что показывает | Конструкции | Время, с |
 | --- | --- | --- | ---: |
-| `q01_products_by_country.sql` | Продукты, доля с Nutri-Score и с текстом состава по странам | JOIN ×2, GROUP BY, HAVING | 1,8 |
-| `q02_grade_share_by_country.sql` | Распределение A–E в 10 крупнейших странах | CTE ×2, оконная `SUM() OVER (PARTITION BY)` | 3,6 |
-| `q03_sugar_rank_categories.sql` | Топ-3 категорий по среднему сахару внутри каждой пищевой группы | CTE ×3, JOIN ×4, HAVING, `RANK() OVER` | 6,1 |
-| `q04_completeness_country_food_group.sql` | Полнота 8 нутриентов: страна × группа, только однострановые продукты (H1) | CTE, LEFT JOIN, HAVING | 5,7 |
+| `q01_products_by_country.sql` | Продукты, доля с Nutri-Score и с текстом состава по странам | JOIN ×2, GROUP BY, HAVING | 1,6 |
+| `q02_grade_share_by_country.sql` | Распределение A–E в 10 крупнейших странах | CTE ×2, оконная `SUM() OVER (PARTITION BY)` | 3,1 |
+| `q03_sugar_rank_categories.sql` | Топ-3 категорий по среднему сахару внутри каждой пищевой группы | CTE ×3, JOIN ×4, HAVING, `RANK() OVER` | 5,7 |
+| `q04_completeness_country_food_group.sql` | Полнота 8 нутриентов: страна × группа, только однострановые продукты (H1) | CTE, LEFT JOIN, HAVING | 5,8 |
 | `q05_sweeteners_sugar.sql` | Сахар и доля A/B с подсластителями и без (H2) | JOIN ×3, GROUP BY, HAVING | 1,2 |
 | `q06_products_per_year_running.sql` | Рост базы по годам, накопительный итог | CTE, `SUM() OVER (ORDER BY)`, `LAG()` | 0,7 |
-| `q07_salt_above_group_average.sql` | Доля продуктов с солью выше среднего своей группы | CTE ×2, скалярный подзапрос, `IN (SELECT …)` | 2,4 |
-| `q08_multi_country_products.sql` | Продукты, продаваемые в 3+ странах, по группам | CTE, JOIN, HAVING | 1,3 |
-| `q09_salt_quartile_grades.sql` | Распределение грейдов по квартилям соли | `NTILE(4) OVER`, оконная доля | 2,0 |
+| `q07_salt_above_group_average.sql` | Доля продуктов с солью выше среднего своей группы | CTE ×2, скалярный подзапрос, `IN (SELECT …)` | 2,6 |
+| `q08_multi_country_products.sql` | Продукты, продаваемые в 3+ странах, по группам | CTE, JOIN, HAVING | 1,5 |
+| `q09_salt_quartile_grades.sql` | Распределение грейдов по квартилям соли | `NTILE(4) OVER`, оконная доля | 2,2 |
 | `q10_nova_vs_grade.sql` | NOVA × Nutri-Score | `SUM() OVER`, `DENSE_RANK() OVER` | 0,4 |
 
 Как результаты используются в анализе — см. [отчёт](REPORT.md#sql-и-выводы).
