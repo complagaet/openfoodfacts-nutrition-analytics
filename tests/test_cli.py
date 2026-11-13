@@ -12,7 +12,7 @@ def make_pipeline_targets() -> list[str]:
 
 
 def test_cli_pipeline_runs_the_same_stages_as_make_pipeline() -> None:
-    assert PIPELINE_STAGES == make_pipeline_targets()
+    assert make_pipeline_targets() == PIPELINE_STAGES
 
 
 def test_every_pipeline_stage_is_a_cli_stage() -> None:
