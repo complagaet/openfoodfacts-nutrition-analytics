@@ -22,7 +22,7 @@
 
 | Задача | Где выполнено | Подтверждение |
 | --- | --- | --- |
-| Загрузка с ограниченной памятью, партиционированный Parquet, `category`/downcast, память до/после | `etl.py` (пачки по 250 000, партиции `food_group`), `measure_dtype_savings`, `csv_audit.py::wide_memory` | 257,6 → 121,3 МиБ; CSV 201 столбец: 20,99 → 8,81 МиБ; пик RSS ETL 3,6 ГБ |
+| Загрузка с ограниченной памятью, партиционированный Parquet, `category`/downcast, память до/после | `etl.py` (пачки по 250 000, партиции `food_group`), `measure_dtype_savings`, `csv_audit.py::wide_memory` | 257,6 → 121,3 МиБ; CSV 201 столбец: 20,99 → 8,81 МиБ; пик RSS ETL 3 582 МиБ (3,5 ГиБ) |
 | ≥ 2 инструмента на одной задаче: время, пик памяти, совпадение | `engines.py`, `benchmark.py`, `bench_worker.py` (отдельные процессы) | REPORT §4, `docs/results/benchmark.json`, `tests/test_pipeline.py::test_all_engines_produce_equal_aggregates` |
 | Ленивые вычисления / инкрементальные агрегаты | `engines.py::polars_lazy` (`collect_all`, streaming), `engines.py::pandas_chunked`, счётчики нарушений в `etl.py::run_etl` | код |
 | Аудит пропусков, дубликатов, некорректных значений и дат, выбросов; правила очистки | `audit.py`, `etl.py::quality_rules`, `apply_cleaning` | REPORT §3 |

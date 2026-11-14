@@ -58,7 +58,7 @@ make pipeline PROFILE=full       # ≈4 минуты на MacBook Air M4 / 24 Г
 make acquire-csv && make csv-audit PROFILE=full   # необязательная проверка CSV-выгрузки (20 МБ)
 ```
 
-Пик RSS любого этапа полного прогона не превышает 3,6 ГБ (замеры — в
+Пик RSS любого этапа полного прогона не превышает 3 582 МиБ (3,5 ГиБ, этап ETL; замеры — в
 [docs/results](docs/results)). Данные, `outputs/` и SQLite в Git не попадают;
 итоговые таблицы и JSON-отчёты полного прогона скопированы в `docs/results/`.
 
@@ -84,6 +84,7 @@ make acquire-csv && make csv-audit PROFILE=full   # необязательная
 - [Схема БД и запросы](docs/DATABASE.md)
 - [Карта критериев оценки → код → подтверждение](docs/RUBRIC_MAP.md)
 - [Критерии оценки](docs/ASSESSMENT.md), [описание проекта](docs/PROJECT_BRIEF.md), [источники](docs/SOURCES.md)
+- [Руководство для подготовки к защите (English)](docs/DEFENSE_GUIDE.md)
 
 ## Данные и лицензия
 
