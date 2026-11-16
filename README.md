@@ -44,8 +44,9 @@ make pipeline
 не может подменить исходники. (Editable-установка не годится: на macOS в `~/Documents`
 система помечает её `.pth` скрытым, и Python 3.12 его пропускает.)
 
-Консольное меню вместо дашборда: `make menu`. Презентация `docs/slides.pptx` пересобирается
-из `docs/SLIDES.md` и `docs/results` командой `make slides` (python-pptx из `requirements-dev.txt`).
+Консольное меню вместо дашборда: `make menu`. Команда `make slides` собирает PowerPoint
+`docs/slides.pptx` из `docs/SLIDES.md` и `docs/results` (python-pptx из `requirements-dev.txt`).
+Презентация для защиты доступна в разделе «Документы».
 Отдельные этапы: `make etl`, `make audit`, `make sql` и т. д. (см. `Makefile`).
 Полный набор транзитивных версий, проверенный в чистом окружении, — `requirements-lock.txt`
 (`pip install -r requirements-lock.txt` вместо `requirements.txt`).
@@ -80,7 +81,9 @@ make acquire-csv && make csv-audit PROFILE=full   # необязательная
 
 ## Документы
 
-- [Отчёт](docs/REPORT.md) и [план презентации](docs/SLIDES.md)
+- Презентация для защиты — [PDF](docs/submission/Open-Food-Facts-Defense.pdf) и [HTML](docs/submission/Open-Food-Facts-Defense.html) (открывается в браузере после скачивания)
+- Итоговый отчёт — [PDF](docs/submission/Open-Food-Facts-Report.pdf) и [DOCX](docs/submission/Open-Food-Facts-Report.docx)
+- [Технический отчёт](docs/REPORT.md) и [план презентации](docs/SLIDES.md)
 - [Схема БД и запросы](docs/DATABASE.md)
 - [Карта критериев оценки → код → подтверждение](docs/RUBRIC_MAP.md)
 - [Критерии оценки](docs/ASSESSMENT.md), [описание проекта](docs/PROJECT_BRIEF.md), [источники](docs/SOURCES.md)
