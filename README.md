@@ -3,7 +3,6 @@
 [![CI](https://github.com/complagaet/openfoodfacts-nutrition-analytics/actions/workflows/ci.yml/badge.svg)](https://github.com/complagaet/openfoodfacts-nutrition-analytics/actions/workflows/ci.yml)
 
 Итоговый проект №43 по дисциплине **Programming for Data Analysis and Database**
-(название курса взято из исходного задания; см. «Открытые вопросы»).
 Кластер 8: **Large-Scale Data Processing (Pandas, Polars, Dask, Parquet)**.
 
 Проект обрабатывает полный снимок Open Food Facts (4 906 869 продуктов, 7,5 ГиБ Parquet),
@@ -16,11 +15,29 @@
 Группа **AAI-2606M**: Pavel Lukoyanov, Arsen Ozhetov, Ayan Amantay.
 Распределение вклада фиксируется в [отчёте](docs/REPORT.md#вклад-участников).
 
-## Быстрый запуск: чистый клон → дашборд (≈1 минута, без интернета для данных)
+## С чего начать
+
+Это обычный Python-проект: исходники находятся в `src/offna/`, а дашборд — в `app.py`.
+Файлов Jupyter Notebook (`.ipynb`) в репозитории нет. В VS Code нужно открыть папку,
+в которой находятся этот README, `Makefile` и `pyproject.toml`.
+
+Для знакомства с результатами запускать обработку не обязательно:
+
+- `docs/REPORT.md` — данные, методы, результаты и ограничения;
+- `docs/slides.pptx` — презентация;
+- `docs/figures/fig5_interactive_sugar_salt.html` — интерактивный график, открывается в браузере;
+- `docs/results/` — сохранённые таблицы и отчёты полного прогона.
+
+Обработка состоит из семи этапов: очистка данных → аудит качества → агрегаты для интерфейса →
+сравнение Pandas и Polars → SQLite и SQL-запросы → модели Nutri-Score → EDA и гипотезы.
+Их порядок задан в `src/offna/cli.py`.
+
+## Запуск демо на macOS / Linux
 
 Нужны Python 3.12 и [uv](https://docs.astral.sh/uv/) (или обычный `pip`, см. ниже).
 Демо работает на закоммиченной выборке `tests/fixtures/off_sample.parquet`
 (10 000 продуктов, 1,4 МБ, ODbL).
+Интернет нужен для установки зависимостей; отдельно скачивать данные для демо не нужно.
 
 ```bash
 git clone git@github.com:complagaet/openfoodfacts-nutrition-analytics.git
@@ -39,10 +56,8 @@ python3.12 -m venv .venv
 make pipeline
 ```
 
-Пакет `offna` не устанавливается в `.venv`: `make` запускает его прямо из `src/`, pytest берёт `src/`
-через `pythonpath`, поэтому правки кода видны сразу и устаревшая копия в site-packages
-не может подменить исходники. (Editable-установка не годится: на macOS в `~/Documents`
-система помечает её `.pth` скрытым, и Python 3.12 его пропускает.)
+Команды `make` запускают `offna` прямо из `src/`. Для тестов этот путь задан в `pyproject.toml`.
+Устанавливать сам пакет отдельно не требуется.
 
 Консольное меню вместо дашборда: `make menu`. Команда `make slides` собирает PowerPoint
 `docs/slides.pptx` из `docs/SLIDES.md` и `docs/results` (python-pptx из `requirements-dev.txt`).
@@ -50,6 +65,17 @@ make pipeline
 Отдельные этапы: `make etl`, `make audit`, `make sql` и т. д. (см. `Makefile`).
 Полный набор транзитивных версий, проверенный в чистом окружении, — `requirements-lock.txt`
 (`pip install -r requirements-lock.txt` вместо `requirements.txt`).
+
+### Если вы работаете в Windows
+
+Текущие команды `Makefile` рассчитаны на Unix-окружение: они используют `.venv/bin/python`
+и синтаксис `PYTHONPATH=...`. Кроме того, `src/offna/measure.py` импортирует модуль `resource`,
+которого нет в стандартной библиотеке Python для Windows. Поэтому запуск в обычном PowerShell
+потребует изменений в коде и командах, а одной установки зависимостей недостаточно.
+
+Для запуска без изменения исходников можно использовать Linux-окружение WSL с Python 3.12,
+`make` и `uv`, выполняя команды выше внутри него. Этот вариант нужно проверить на своём компьютере
+до защиты. Сохранённые отчёты, презентацию и HTML-график можно просматривать непосредственно в Windows.
 
 ## Полный прогон на всём снимке
 
@@ -59,7 +85,8 @@ make pipeline PROFILE=full       # ≈4 минуты на MacBook Air M4 / 24 Г
 make acquire-csv && make csv-audit PROFILE=full   # необязательная проверка CSV-выгрузки (20 МБ)
 ```
 
-Пик RSS любого этапа полного прогона не превышает 3 582 МиБ (3,5 ГиБ, этап ETL; замеры — в
+В сохранённом полном прогоне максимальный пик RSS среди этапов составил 3 582 МиБ
+(3,5 ГиБ, этап ETL; замеры — в
 [docs/results](docs/results)). Данные, `outputs/` и SQLite в Git не попадают;
 итоговые таблицы и JSON-отчёты полного прогона скопированы в `docs/results/`.
 
@@ -96,15 +123,15 @@ make acquire-csv && make csv-audit PROFILE=full   # необязательная
 `food.parquet`, ревизия `11cc007d7e6709c304405410e4fb23720c4a4aa2` (закреплена в `src/offna/config.py`),
 получен 12.11.2026, sha256 `be58c2f3b3987e06c3cb0d87726c0da6c5242e7fb11e331f7e1dfcae8906707c`.
 `make acquire` скачивает именно эту ревизию и сверяет sha256 с ETag хаба; другая ревизия —
-`.venv/bin/python -I -m offna acquire --source parquet --revision <sha>`.
+`PYTHONPATH=src .venv/bin/python -m offna acquire --source parquet --revision <sha>`.
 База распространяется по [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/),
 содержимое — по Database Contents License. Фикстура `tests/fixtures/off_sample.parquet`
 является производной базой и распространяется на тех же условиях ODbL с указанием
 источника. Лицензия собственного кода проекта командой пока не выбрана.
 
-## Открытые вопросы
+## Перед сдачей
 
-- Название курса: в README указано «Programming for Data Analysis and Database»;
-  в оценке задания встречается иной вариант. Сверить с Moodle.
-- Утверждение темы преподавателем, дата экзамена, доступ преподавателя к приватному репозиторию.
-- Распределение вклада участников (таблица в отчёте заполнена заглушками).
+- Заполнить фактический вклад участников в отчёте и распределить выступление в `docs/SLIDES.md`.
+- После изменения плана пересобрать презентацию командой `make slides`.
+- Проверить демо на компьютере, который будет использоваться на защите.
+- Сверить название курса и сроки с Moodle, проверить доступ преподавателя к репозиторию.
